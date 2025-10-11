@@ -1,12 +1,13 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabaseClient';
+import { ERROR_MESSAGES } from '@/lib/constants/errorMessages';
 
 export async function POST(req: Request) {
   try {
     const { session_id, user_answer } = await req.json();
 
     if (!session_id || !user_answer) {
-      throw new Error('Session ID and user answer are required');
+      throw new Error(ERROR_MESSAGES.INVALID_SUBMITTED_BODY);
     }
 
     const { data: session, error: sessionError } = await supabase
@@ -16,7 +17,9 @@ export async function POST(req: Request) {
       .single();
 
     if (sessionError || !session) {
-      throw new Error('Session not found');
+      throw new Error(
+        sessionError?.message || ERROR_MESSAGES.INVALID_SUBMITTED_BODY
+      );
     }
 
     const isCorrect = Number(user_answer) === Number(session.correct_answer);
@@ -43,9 +46,9 @@ export async function POST(req: Request) {
       feedback_text: feedback,
     });
   } catch (error) {
-    console.error('Error submitting answer:', error);
+    console.log('Error on answer submission', error);
     return NextResponse.json(
-      { error: 'Failed to submit answer' },
+      { error: ERROR_MESSAGES.SUBMIT_ANSWER_FAILED },
       { status: 500 }
     );
   }

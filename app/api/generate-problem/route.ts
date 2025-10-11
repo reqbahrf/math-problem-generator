@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { supabase } from '@/lib/supabaseClient';
 import { MATH_PROBLEMS_PRIMARY_5_PROMPT } from '@/lib/prompts/mathPrompts';
+import { ERROR_MESSAGES } from '@/lib/constants/errorMessages';
 
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
 
@@ -17,7 +18,7 @@ export async function GET() {
     const json = jsonMatch ? JSON.parse(jsonMatch[0]) : null;
 
     if (!json || !json.problem_text || !json.final_answer) {
-      throw new Error('Invalid response format');
+      throw new Error(ERROR_MESSAGES.INVALID_AI_RESPONSE);
     }
 
     const { data, error } = await supabase
@@ -39,9 +40,11 @@ export async function GET() {
       final_answer: json.final_answer,
     });
   } catch (error) {
-    console.error('Error generating math problem:', error);
+    console.log('Generate problem failed', error);
     return NextResponse.json(
-      { error: 'Failed to generate math problem' },
+      {
+        error: ERROR_MESSAGES.GENERATE_PROBLEM_FAILED,
+      },
       { status: 500 }
     );
   }

@@ -15,6 +15,7 @@ interface MathProblemContextType {
   isLoading: boolean;
   generateProblem: () => Promise<void>;
   submitAnswer: (answer: string) => Promise<void>;
+  error: string | null;
 }
 
 const MathProblemContext = createContext<MathProblemContextType | undefined>(
@@ -29,12 +30,15 @@ export const MathProblemProvider = ({ children }: { children: ReactNode }) => {
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
+  const [error, setError] = useState<string | null>(null);
+
   const generateProblem = async () => {
     setProblem(null);
     setUserAnswer('');
     setIsLoading(true);
     setFeedback('');
     setIsCorrect(null);
+    setError(null);
     try {
       const res = await fetch('/api/generate-problem');
       const data = await res.json();
@@ -47,6 +51,9 @@ export const MathProblemProvider = ({ children }: { children: ReactNode }) => {
         final_answer: data.final_answer,
       });
     } catch (error) {
+      setError(
+        error instanceof Error ? error.message : 'Failed to generate problem'
+      );
       console.error('Error generating math problem:', error);
     } finally {
       setIsLoading(false);
@@ -75,6 +82,9 @@ export const MathProblemProvider = ({ children }: { children: ReactNode }) => {
       setIsCorrect(data.is_correct);
       setFeedback(data.feedback_text);
     } catch (error) {
+      setError(
+        error instanceof Error ? error.message : 'Failed to submit answer'
+      );
       console.error('Error submitting answer:', error);
     } finally {
       setIsLoading(false);
@@ -92,6 +102,7 @@ export const MathProblemProvider = ({ children }: { children: ReactNode }) => {
         isLoading,
         generateProblem,
         submitAnswer,
+        error,
       }}
     >
       {children}

@@ -3,16 +3,21 @@
 import { useEffect, useState } from 'react';
 
 const DarkModeToggle = () => {
-  const [darkMode, setDarkMode] = useState<boolean>(() => {
-    if (typeof window === 'undefined') return false;
-    return (
-      localStorage.themeIsDark === 'true' ||
-      (!('themeIsDark' in localStorage) &&
-        window.matchMedia('(prefers-color-scheme: dark)').matches)
-    );
-  });
+  const [mounted, setMounted] = useState<boolean>(false);
+  const [darkMode, setDarkMode] = useState<boolean>(false);
 
   useEffect(() => {
+    setMounted(true);
+    const isDark =
+      localStorage.themeIsDark === 'true' ||
+      (!('themeIsDark' in localStorage) &&
+        window.matchMedia('(prefers-color-scheme: dark)').matches);
+
+    setDarkMode(isDark);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
     const root = window.document.documentElement;
 
     if (darkMode) {
@@ -22,8 +27,9 @@ const DarkModeToggle = () => {
       root.classList.remove('dark');
       localStorage.themeIsDark = 'false';
     }
-  }, [darkMode]);
+  }, [darkMode, mounted]);
 
+  if (!mounted) return null;
   return (
     <div className='fixed top-4 right-4 z-50'>
       <button
