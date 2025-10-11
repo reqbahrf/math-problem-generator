@@ -1,0 +1,50 @@
+'use client';
+import { useState } from 'react';
+import { useMathProblem } from '@/app/context/MathProblemContext';
+
+const AnswerForm = () => {
+  const { submitAnswer, isLoading, userAnswer, setUserAnswer, isCorrect } =
+    useMathProblem();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await submitAnswer(userAnswer);
+  };
+  return (
+    <>
+      <form
+        onSubmit={handleSubmit}
+        className='space-y-4'
+      >
+        <div>
+          <label
+            htmlFor='answer'
+            className='block text-sm font-medium text-gray-700 mb-2'
+          >
+            Your Answer:
+          </label>
+          <input
+            type='number'
+            id='answer'
+            disabled={isCorrect !== null}
+            value={userAnswer}
+            onChange={(e) => setUserAnswer(e.target.value)}
+            className='w-full text-black px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            placeholder='Enter your answer'
+            required
+          />
+        </div>
+
+        <button
+          type='submit'
+          disabled={!userAnswer || isLoading || isCorrect !== null}
+          className='w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:hover:bg-gray-400 disabled:hover:scale-100 text-white font-bold py-3 px-4 rounded-lg transition duration-200 ease-in-out transform hover:scale-105'
+        >
+          Submit Answer
+        </button>
+      </form>
+    </>
+  );
+};
+
+export default AnswerForm;

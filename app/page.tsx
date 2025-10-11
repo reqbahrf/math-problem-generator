@@ -1,73 +1,12 @@
 'use client';
 
-import { useState } from 'react';
-
-interface MathProblem {
-  problem_text: string;
-  final_answer: number;
-}
+import { useMathProblem } from './context/MathProblemContext';
+import FeedbackCard from './components/FeedbackCard';
+import ProblemCard from './components/problem/ProblemCard';
 
 export default function Home() {
-  const [problem, setProblem] = useState<MathProblem | null>(null);
-  const [userAnswer, setUserAnswer] = useState('');
-  const [feedback, setFeedback] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [sessionId, setSessionId] = useState<string | null>(null);
-  const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
-
-  const generateProblem = async () => {
-    setProblem(null);
-    setUserAnswer('');
-    setIsLoading(true);
-    setFeedback('');
-    setIsCorrect(null);
-    try {
-      const res = await fetch('/api/generate-problem');
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || 'Failed to generate problem');
-      }
-      setSessionId(data.session_id);
-      setProblem({
-        problem_text: data.problem_text,
-        final_answer: data.final_answer,
-      });
-    } catch (error) {
-      console.error('Error generating math problem:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const submitAnswer = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setFeedback('');
-    setIsCorrect(null);
-    try {
-      const res = await fetch('/api/submit-answer', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          session_id: sessionId,
-          user_answer: userAnswer,
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || 'Failed to submit answer');
-      }
-      setIsCorrect(data.is_correct);
-      setFeedback(data.feedback_text);
-    } catch (error) {
-      console.error('Error submitting answer:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
+  const { generateProblem, problem, isLoading, feedback, isCorrect } =
+    useMathProblem();
   return (
     <div className='min-h-screen bg-gradient-to-b from-blue-50 to-white'>
       <main className='container mx-auto px-4 py-8 max-w-2xl'>
@@ -85,61 +24,13 @@ export default function Home() {
           </button>
         </div>
 
-        {problem && (
-          <div className='bg-white rounded-lg shadow-lg p-6 mb-6'>
-            <h2 className='text-xl font-semibold mb-4 text-gray-700'>
-              Problem:
-            </h2>
-            <p className='text-lg text-gray-800 leading-relaxed mb-6'>
-              {problem.problem_text}
-            </p>
-
-            <form
-              onSubmit={submitAnswer}
-              className='space-y-4'
-            >
-              <div>
-                <label
-                  htmlFor='answer'
-                  className='block text-sm font-medium text-gray-700 mb-2'
-                >
-                  Your Answer:
-                </label>
-                <input
-                  type='number'
-                  id='answer'
-                  value={userAnswer}
-                  onChange={(e) => setUserAnswer(e.target.value)}
-                  className='w-full text-black px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
-                  placeholder='Enter your answer'
-                  required
-                />
-              </div>
-
-              <button
-                type='submit'
-                disabled={!userAnswer || isLoading}
-                className='w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-bold py-3 px-4 rounded-lg transition duration-200 ease-in-out transform hover:scale-105'
-              >
-                Submit Answer
-              </button>
-            </form>
-          </div>
-        )}
+        {problem && <ProblemCard problemText={problem.problem_text} />}
 
         {feedback && (
-          <div
-            className={`rounded-lg shadow-lg p-6 ${
-              isCorrect
-                ? 'bg-green-50 border-2 border-green-200'
-                : 'bg-yellow-50 border-2 border-yellow-200'
-            }`}
-          >
-            <h2 className='text-xl font-semibold mb-4 text-gray-700'>
-              {isCorrect ? '✅ Correct!' : '❌ Not quite right'}
-            </h2>
-            <p className='text-gray-800 leading-relaxed'>{feedback}</p>
-          </div>
+          <FeedbackCard
+            isCorrect={isCorrect}
+            feedback={feedback}
+          />
         )}
       </main>
     </div>
