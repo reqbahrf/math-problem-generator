@@ -1,9 +1,15 @@
 'use client';
 import React, { createContext, ReactNode, useContext, useState } from 'react';
+import { MathProblem } from '../types/problemTypes';
+interface AnswerResponse {
+  is_correct: boolean;
+  feedback_text: string;
+  error?: string;
+}
 
-interface MathProblem {
-  problem_text: string;
-  final_answer: number;
+interface MathProblemResponse extends MathProblem {
+  session_id: string;
+  error?: string;
 }
 
 interface LoadingState {
@@ -51,14 +57,17 @@ export const MathProblemProvider = ({ children }: { children: ReactNode }) => {
     setError(null);
     try {
       const res = await fetch('/api/generate-problem');
-      const data = await res.json();
+      const data = (await res.json()) as MathProblemResponse;
       if (!res.ok) {
         throw new Error(data.error || 'Failed to generate problem');
       }
       setSessionId(data.session_id);
       setProblem({
         problem_text: data.problem_text,
-        final_answer: data.final_answer,
+        problem_type: data.problem_type,
+        step_by_step_solution: data.step_by_step_solution,
+        difficulty_level: data.difficulty_level,
+        hint: data.hint,
       });
     } catch (error) {
       setError(
@@ -85,7 +94,7 @@ export const MathProblemProvider = ({ children }: { children: ReactNode }) => {
           user_answer: userAnswer,
         }),
       });
-      const data = await res.json();
+      const data = (await res.json()) as AnswerResponse;
       if (!res.ok) {
         throw new Error(data.error || 'Failed to submit answer');
       }

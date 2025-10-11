@@ -14,9 +14,10 @@ const FeedbackCard = ({ isCorrect, feedback }: FeedbackProps) => {
       <h2 className='text-xl font-semibold mb-4 text-gray-700 dark:text-white'>
         {isCorrect ? '✅ Correct!' : '❌ Not quite right'}
       </h2>
-      <p className='text-gray-800 dark:text-white leading-relaxed'>
-        {feedback}
-      </p>
+      <p
+        className='text-gray-800 dark:text-white leading-relaxed'
+        dangerouslySetInnerHTML={{ __html: feedback }}
+      />
     </div>
   );
 };

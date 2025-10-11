@@ -17,7 +17,15 @@ export async function GET() {
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     const json = jsonMatch ? JSON.parse(jsonMatch[0]) : null;
 
-    if (!json || !json.problem_text || !json.final_answer) {
+    if (
+      !json ||
+      !json.problem_text ||
+      !json.final_answer ||
+      !json.problem_type ||
+      !json.difficulty_level ||
+      !json.step_by_step_solution ||
+      !json.hint
+    ) {
       throw new Error(ERROR_MESSAGES.INVALID_AI_RESPONSE);
     }
 
@@ -27,6 +35,10 @@ export async function GET() {
         {
           problem_text: json.problem_text,
           correct_answer: json.final_answer,
+          problem_type: json.problem_type,
+          difficulty_level: json.difficulty_level,
+          step_by_step_solution: json.step_by_step_solution,
+          hint: json.hint,
         },
       ])
       .select('id')
@@ -37,7 +49,10 @@ export async function GET() {
     return NextResponse.json({
       session_id: data.id,
       problem_text: json.problem_text,
-      final_answer: json.final_answer,
+      problem_type: json.problem_type,
+      difficulty_level: json.difficulty_level,
+      step_by_step_solution: json.step_by_step_solution,
+      hint: json.hint,
     });
   } catch (error) {
     console.log('Generate problem failed', error);

@@ -1,9 +1,15 @@
+CREATE TYPE problem_type_enum AS ENUM ('Addition', 'Subtraction', 'Multiplication', 'Division');
+CREATE TYPE difficulty_level_enum AS ENUM ('Easy', 'Medium', 'Hard');
 -- Create math_problem_sessions table
 CREATE TABLE IF NOT EXISTS math_problem_sessions (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     problem_text TEXT NOT NULL,
-    correct_answer NUMERIC NOT NULL
+    problem_type problem_type_enum NOT NULL,
+    difficulty_level difficulty_level_enum NOT NULL,
+    correct_answer NUMERIC NOT NULL,
+    step_by_step_solution TEXT NOT NULL,
+    hint TEXT NOT NULL
 );
 
 -- Create math_problem_submissions table

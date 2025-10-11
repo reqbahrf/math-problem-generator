@@ -1,5 +1,7 @@
 'use client';
 import { useMathProblem } from '@/app/context/MathProblemContext';
+import ToggleHint from './ToggleHint';
+import { memo } from 'react';
 
 const AnswerForm = () => {
   const { submitAnswer, isLoading, userAnswer, setUserAnswer, isCorrect } =
@@ -45,6 +47,7 @@ const AnswerForm = () => {
         >
           Submit Answer
         </button>
+        <ToggleHint />
       </form>
     </>
   );

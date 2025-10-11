@@ -29,7 +29,7 @@ export default function Home() {
           </button>
         </div>
 
-        {problem && <ProblemCard problemText={problem.problem_text} />}
+        {problem && <ProblemCard {...problem} />}
 
         {feedback && (
           <FeedbackCard

@@ -12,7 +12,7 @@ export async function POST(req: Request) {
 
     const { data: session, error: sessionError } = await supabase
       .from('math_problem_sessions')
-      .select('correct_answer')
+      .select('correct_answer, step_by_step_solution')
       .eq('id', session_id)
       .single();
 
@@ -25,8 +25,8 @@ export async function POST(req: Request) {
     const isCorrect = Number(user_answer) === Number(session.correct_answer);
 
     const feedback = isCorrect
-      ? 'Great job! Your answer is correct. 🎉'
-      : `Not quite right. The correct answer was ${session.correct_answer}.`;
+      ? `Great job! Your answer is correct. 🎉 ${session.step_by_step_solution}`
+      : `Not quite right. Here's the step-by-step solution: ${session.step_by_step_solution}`;
 
     const { error: insertError } = await supabase
       .from('math_problem_submissions')
