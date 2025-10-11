@@ -6,13 +6,18 @@ interface MathProblem {
   final_answer: number;
 }
 
+interface LoadingState {
+  type: 'generate' | 'submit-answer' | null;
+  isLoading: boolean | null;
+}
+
 interface MathProblemContextType {
   problem: MathProblem | null;
   feedback: string;
   userAnswer: string;
   setUserAnswer: (answer: string) => void;
   isCorrect: boolean | null;
-  isLoading: boolean;
+  isLoading: LoadingState;
   generateProblem: () => Promise<void>;
   submitAnswer: (answer: string) => Promise<void>;
   error: string | null;
@@ -22,20 +27,25 @@ const MathProblemContext = createContext<MathProblemContextType | undefined>(
   undefined
 );
 
+const initialLoading: LoadingState = {
+  type: null,
+  isLoading: false,
+};
+
 export const MathProblemProvider = ({ children }: { children: ReactNode }) => {
   const [problem, setProblem] = useState<MathProblem | null>(null);
   const [userAnswer, setUserAnswer] = useState('');
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<string>('');
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<LoadingState>(initialLoading);
 
   const [error, setError] = useState<string | null>(null);
 
   const generateProblem = async () => {
     setProblem(null);
     setUserAnswer('');
-    setIsLoading(true);
+    setIsLoading({ type: 'generate', isLoading: true });
     setFeedback('');
     setIsCorrect(null);
     setError(null);
@@ -56,12 +66,12 @@ export const MathProblemProvider = ({ children }: { children: ReactNode }) => {
       );
       console.error('Error generating math problem:', error);
     } finally {
-      setIsLoading(false);
+      setIsLoading(initialLoading);
     }
   };
 
   const submitAnswer = async (userAnswer: string) => {
-    setIsLoading(true);
+    setIsLoading({ type: 'submit-answer', isLoading: true });
     setFeedback('');
     setIsCorrect(null);
     try {
@@ -87,7 +97,7 @@ export const MathProblemProvider = ({ children }: { children: ReactNode }) => {
       );
       console.error('Error submitting answer:', error);
     } finally {
-      setIsLoading(false);
+      setIsLoading(initialLoading);
     }
   };
 

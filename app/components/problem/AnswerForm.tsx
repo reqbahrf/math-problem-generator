@@ -1,5 +1,4 @@
 'use client';
-import { useState } from 'react';
 import { useMathProblem } from '@/app/context/MathProblemContext';
 
 const AnswerForm = () => {
@@ -37,7 +36,11 @@ const AnswerForm = () => {
 
         <button
           type='submit'
-          disabled={!userAnswer || isLoading || isCorrect !== null}
+          disabled={
+            !userAnswer ||
+            (isLoading.type === 'submit-answer' && isLoading.isLoading) ||
+            isCorrect !== null
+          }
           className='w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:hover:bg-gray-400 disabled:hover:scale-100 text-white font-bold py-3 px-4 rounded-lg transition duration-200 ease-in-out transform hover:scale-105'
         >
           Submit Answer
