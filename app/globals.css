@@ -1,6 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+@custom-variant dark (&:where(.dark, .dark *));
 
 :root {
   --foreground-rgb: 0, 0, 0;
@@ -14,6 +15,10 @@
     --background-start-rgb: 0, 0, 0;
     --background-end-rgb: 0, 0, 0;
   }
+}
+
+* {
+  transition: background-color 0.3s, color 0.3s;
 }
 
 body {
