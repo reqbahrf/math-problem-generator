@@ -7,7 +7,9 @@ const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
 
 export async function GET() {
   try {
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+    const model = genAI.getGenerativeModel({
+      model: 'gemini-2.5-flash-lite',
+    });
     const result = await model.generateContent(MATH_PROBLEMS_PRIMARY_5_PROMPT);
     const text = result.response.text().trim();
 

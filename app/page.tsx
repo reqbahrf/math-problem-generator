@@ -16,6 +16,8 @@ export default function Home() {
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
 
   const generateProblem = async () => {
+    setProblem(null);
+    setUserAnswer('');
     setIsLoading(true);
     setFeedback('');
     setIsCorrect(null);
@@ -108,7 +110,7 @@ export default function Home() {
                   id='answer'
                   value={userAnswer}
                   onChange={(e) => setUserAnswer(e.target.value)}
-                  className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+                  className='w-full text-black px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
                   placeholder='Enter your answer'
                   required
                 />
