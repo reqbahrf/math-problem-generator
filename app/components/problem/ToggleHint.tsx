@@ -1,6 +1,6 @@
 'use client';
 import { useMathProblem } from '@/app/context/MathProblemContext';
-import { memo, useState } from 'react';
+import { useState } from 'react';
 
 const ToggleHint = () => {
   const [showHint, setShowHint] = useState(false);
@@ -21,7 +21,11 @@ const ToggleHint = () => {
       </div>
       <div className='flex justify-end'>
         <button
-          onClick={() => setShowHint(!showHint)}
+          type='button'
+          onClick={(e) => {
+            e.preventDefault();
+            setShowHint(!showHint);
+          }}
           className='text-gray-600 dark:text-gray-400 font-bold rounded-lg transition duration-200 ease-in-out transform hover:scale-105 text-sm'
         >
           {showHint ? 'Hide Hint' : 'Show Hint'}

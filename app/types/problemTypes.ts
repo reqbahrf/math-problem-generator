@@ -5,3 +5,12 @@ export interface MathProblem {
   difficulty_level: string;
   hint: string;
 }
+
+export interface ProblemHistory {
+  id: string;
+  problem_text: string;
+  user_answer: string;
+  is_correct: boolean;
+  solution: string;
+  created_at: string;
+}

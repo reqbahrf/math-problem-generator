@@ -45,7 +45,9 @@ const AnswerForm = () => {
           }
           className='w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:hover:bg-gray-400 disabled:hover:scale-100 text-white font-bold py-3 px-4 rounded-lg transition duration-200 ease-in-out transform hover:scale-105'
         >
-          Submit Answer
+          {isLoading.type === 'submit-answer' && isLoading.isLoading
+            ? 'Submitting...'
+            : 'Submit Answer'}
         </button>
         <ToggleHint />
       </form>

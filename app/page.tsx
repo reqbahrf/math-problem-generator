@@ -5,10 +5,30 @@ import FeedbackCard from './components/FeedbackCard';
 import ProblemCard from './components/problem/ProblemCard';
 import DarkModeToggle from './components/DarkModeToggle';
 import ErrorCard from './components/ErrorCard';
+import StatCard from './components/stats/StatCard';
+import ViewHistoryCard from './components/stats/ViewHistoryCard';
+import Modal from './components/Modal';
+import { useMemo } from 'react';
 
 export default function Home() {
-  const { generateProblem, problem, isLoading, feedback, isCorrect, error } =
-    useMathProblem();
+  const {
+    generateProblem,
+    problem,
+    problemHistory,
+    showHistory,
+    setShowHistory,
+    score,
+    isLoading,
+    feedback,
+    isCorrect,
+    error,
+  } = useMathProblem();
+
+  const renderHistory = useMemo(() => {
+    if (problemHistory.length === 0) return;
+
+    return problemHistory.map((problem) => <ViewHistoryCard {...problem} />);
+  }, [problemHistory]);
   return (
     <div className='relative min-h-screen bg-gradient-to-b from-blue-50 to-white dark:bg-gradient-to-b dark:from-gray-900 dark:to-gray-800'>
       <DarkModeToggle />
@@ -28,6 +48,12 @@ export default function Home() {
               : 'Generate New Problem'}
           </button>
         </div>
+
+        {(score > 0 || problemHistory.length > 0) && <StatCard />}
+
+        {showHistory && (
+          <Modal onClose={() => setShowHistory(false)}>{renderHistory}</Modal>
+        )}
 
         {problem && <ProblemCard {...problem} />}
 

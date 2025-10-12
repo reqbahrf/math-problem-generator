@@ -151,8 +151,8 @@ _Please fill in this section with any important notes about your implementation,
 If you have time, consider adding:
 
 - [x] Difficulty levels (Easy/Medium/Hard)
-- [ ] Problem history view
-- [ ] Score tracking
+- [x] Problem history view
+- [x] Score tracking
 - [x] Different problem types (addition, subtraction, multiplication, division)
 - [x] Hints system
 - [x] Step-by-step solution explanations

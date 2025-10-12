@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabaseClient';
 import { ERROR_MESSAGES } from '@/lib/constants/errorMessages';
+import { formatDate } from '@/lib/formatDate';
 
 export async function POST(req: Request) {
   try {
@@ -12,7 +13,7 @@ export async function POST(req: Request) {
 
     const { data: session, error: sessionError } = await supabase
       .from('math_problem_sessions')
-      .select('correct_answer, step_by_step_solution')
+      .select('correct_answer, step_by_step_solution, created_at')
       .eq('id', session_id)
       .single();
 
@@ -44,6 +45,8 @@ export async function POST(req: Request) {
     return NextResponse.json({
       is_correct: isCorrect,
       feedback_text: feedback,
+      solution: session.step_by_step_solution,
+      created_at: formatDate(session.created_at),
     });
   } catch (error) {
     console.log('Error on answer submission', error);

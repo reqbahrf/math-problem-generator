@@ -1,9 +1,11 @@
 'use client';
 import React, { createContext, ReactNode, useContext, useState } from 'react';
-import { MathProblem } from '../types/problemTypes';
+import { MathProblem, ProblemHistory } from '../types/problemTypes';
 interface AnswerResponse {
   is_correct: boolean;
   feedback_text: string;
+  solution: string;
+  created_at: string;
   error?: string;
 }
 
@@ -21,6 +23,10 @@ interface MathProblemContextType {
   problem: MathProblem | null;
   feedback: string;
   userAnswer: string;
+  score: number;
+  problemHistory: ProblemHistory[];
+  showHistory: boolean;
+  setShowHistory: (show: boolean) => void;
   setUserAnswer: (answer: string) => void;
   isCorrect: boolean | null;
   isLoading: LoadingState;
@@ -45,6 +51,10 @@ export const MathProblemProvider = ({ children }: { children: ReactNode }) => {
   const [feedback, setFeedback] = useState<string>('');
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [isLoading, setIsLoading] = useState<LoadingState>(initialLoading);
+
+  const [score, setScore] = useState<number>(0);
+  const [problemHistory, setProblemHistory] = useState<ProblemHistory[]>([]);
+  const [showHistory, setShowHistory] = useState<boolean>(false);
 
   const [error, setError] = useState<string | null>(null);
 
@@ -99,7 +109,19 @@ export const MathProblemProvider = ({ children }: { children: ReactNode }) => {
         throw new Error(data.error || 'Failed to submit answer');
       }
       setIsCorrect(data.is_correct);
+      setScore((prev) => (data.is_correct ? prev + 1 : prev));
       setFeedback(data.feedback_text);
+      setProblemHistory((prev) => [
+        ...prev,
+        {
+          id: sessionId,
+          problem_text: problem?.problem_text || '',
+          user_answer: userAnswer,
+          is_correct: data.is_correct,
+          solution: data.solution,
+          created_at: data.created_at,
+        },
+      ]);
     } catch (error) {
       setError(
         error instanceof Error ? error.message : 'Failed to submit answer'
@@ -115,6 +137,10 @@ export const MathProblemProvider = ({ children }: { children: ReactNode }) => {
       value={{
         userAnswer,
         setUserAnswer,
+        score,
+        problemHistory,
+        showHistory,
+        setShowHistory,
         problem,
         feedback,
         isCorrect,
