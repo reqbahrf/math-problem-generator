@@ -66,7 +66,7 @@ export const MathProblemProvider = ({ children }: { children: ReactNode }) => {
     setIsCorrect(null);
     setError(null);
     try {
-      const res = await fetch('/api/generate-problem');
+      const res = await fetch('/api/math-problem');
       const data = (await res.json()) as MathProblemResponse;
       if (!res.ok) {
         throw new Error(data.error || 'Failed to generate problem');
@@ -75,7 +75,6 @@ export const MathProblemProvider = ({ children }: { children: ReactNode }) => {
       setProblem({
         problem_text: data.problem_text,
         problem_type: data.problem_type,
-        step_by_step_solution: data.step_by_step_solution,
         difficulty_level: data.difficulty_level,
         hint: data.hint,
       });
@@ -94,7 +93,7 @@ export const MathProblemProvider = ({ children }: { children: ReactNode }) => {
     setFeedback('');
     setIsCorrect(null);
     try {
-      const res = await fetch('/api/submit-answer', {
+      const res = await fetch('/api/math-problem/submit', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

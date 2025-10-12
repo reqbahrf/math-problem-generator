@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabaseClient';
 import { ERROR_MESSAGES } from '@/lib/constants/errorMessages';
 import { formatDate } from '@/lib/formatDate';
+import { buildFeedbackPrompt } from '@/lib/buildFeedbackPrompt';
+import PROMPT_OBJ from '@/lib/prompts/mathPrompts';
+import getModelOutput from '@/lib/Genai/googleAI';
 
 export async function POST(req: Request) {
   try {
@@ -13,7 +16,7 @@ export async function POST(req: Request) {
 
     const { data: session, error: sessionError } = await supabase
       .from('math_problem_sessions')
-      .select('correct_answer, step_by_step_solution, created_at')
+      .select('problem_text, correct_answer, step_by_step_solution, created_at')
       .eq('id', session_id)
       .single();
 
@@ -25,9 +28,14 @@ export async function POST(req: Request) {
 
     const isCorrect = Number(user_answer) === Number(session.correct_answer);
 
-    const feedback = isCorrect
-      ? `Great job! Your answer is correct. 🎉 ${session.step_by_step_solution}`
-      : `Not quite right. Here's the step-by-step solution: ${session.step_by_step_solution}`;
+    const feedback = await getModelOutput(
+      buildFeedbackPrompt(PROMPT_OBJ.PERSONALIZED_FEEDBACK_PROMPT, {
+        problem_text: session.problem_text,
+        user_answer,
+        correct_answer: session.correct_answer,
+        step_by_step_solution: session.step_by_step_solution,
+      })
+    );
 
     const { error: insertError } = await supabase
       .from('math_problem_submissions')
@@ -36,7 +44,7 @@ export async function POST(req: Request) {
           session_id,
           user_answer,
           is_correct: isCorrect,
-          feedback_text: feedback,
+          feedback_text: feedback.feedback_text,
         },
       ]);
 
@@ -44,7 +52,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({
       is_correct: isCorrect,
-      feedback_text: feedback,
+      feedback_text: feedback.feedback_text,
       solution: session.step_by_step_solution,
       created_at: formatDate(session.created_at),
     });
