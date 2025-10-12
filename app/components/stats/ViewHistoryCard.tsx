@@ -1,3 +1,4 @@
+'use client';
 import { ProblemHistory } from '@/app/types/problemTypes';
 import React, { memo } from 'react';
 

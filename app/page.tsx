@@ -9,6 +9,7 @@ import StatCard from './components/stats/StatCard';
 import ViewHistoryCard from './components/stats/ViewHistoryCard';
 import Modal from './components/Modal';
 import { useMemo } from 'react';
+import ReloadWarning from './components/RealoadWarning';
 
 export default function Home() {
   const {
@@ -32,6 +33,7 @@ export default function Home() {
   return (
     <div className='relative min-h-screen bg-gradient-to-b from-blue-50 to-white dark:bg-gradient-to-b dark:from-gray-900 dark:to-gray-800'>
       <DarkModeToggle />
+      <ReloadWarning />
       <main className='container mx-auto px-4 py-8 max-w-2xl'>
         <h1 className='text-4xl font-bold text-center mb-8 text-gray-800 dark:text-white'>
           Math Problem Generator
@@ -52,7 +54,7 @@ export default function Home() {
         {(score > 0 || problemHistory.length > 0) && <StatCard />}
 
         {showHistory && (
-          <Modal onClose={() => setShowHistory(false)}>{renderHistory}</Modal>
+          <Modal title='Problem History' onClose={() => setShowHistory(false)}>{renderHistory}</Modal>
         )}
 
         {problem && <ProblemCard {...problem} />}
