@@ -50,6 +50,8 @@ export async function POST(req: Request) {
 
     if (insertError) throw insertError;
 
+    if (!feedback.feedback_text)
+      throw new Error(ERROR_MESSAGES.INVALID_AI_RESPONSE);
     return NextResponse.json({
       is_correct: isCorrect,
       feedback_text: feedback.feedback_text,

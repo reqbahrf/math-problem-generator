@@ -40,16 +40,18 @@ ${BASE_PROMPT}
 - Step-by-step solution
 
 The JSON output must follow this structure:
- {
-   "feedback_text": "A personalized feedback for the math problem. (about 2-3 sentences, use the step-by-step solution to help the student understand where they went wrong, Explain it in a way that a Primary 5 student can understand)",
- }
+  {
+    "feedback_text": "A personalized feedback for the math problem. (about 2-3 sentences, use the step-by-step solution to help the student understand where they went wrong, Explain it in a way that a Primary 5 student can understand)",
+  }
+
+
 Examples:
-{
-  "feedback_text": "Great job! Your answer 3 is correct. When you divide 24 by 8, you get 3."
-},
-{
-  "feedback_text": "Almost there! Your answer 4 is close, but let's go over the steps again. When you divide 24 by 8, the correct answer is 3. Keep practicing!"
-}
+  {
+    "feedback_text": "Great job! Your answer 3 is correct. When you divide 24 by 8, you get 3."
+  },
+  {
+    "feedback_text": "Almost there! Your answer 4 is close, but let's go over the steps again. When you divide 24 by 8, the correct answer is 3. Keep practicing!"
+  }
 `;
 
 const PROMPT_OBJ = {
