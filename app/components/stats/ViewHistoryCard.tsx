@@ -11,15 +11,15 @@ const ViewHistoryCard = ({
   created_at,
 }: ProblemHistory) => {
   return (
-    <div className='bg-white dark:bg-gray-900 rounded-lg shadow-md p-6 grid md:grid-cols-[2fr_2fr] grid-cols-1 gap-4'>
-      <div>
+    <div className='bg-white dark:bg-gray-900 rounded-lg shadow-md p-6 grid grid-cols-[2fr_2fr] gap-4'>
+      <div className='md:col-span-1 col-span-2'>
         <h2 className='text-xl text-gray-700 dark:text-gray-300 font-bold mb-2 border-b pb-1'>
           Problem ID: {id.slice(0, 8)}...
         </h2>
         <p className='text-gray-700 dark:text-gray-300 mb-2'>{problem_text}</p>
       </div>
 
-      <div>
+      <div className='md:col-span-1 col-span-2'>
         <p className='text-gray-700 dark:text-gray-300 mb-2'>
           Your Answer: <span className='font-semibold'>{user_answer}</span>
         </p>
