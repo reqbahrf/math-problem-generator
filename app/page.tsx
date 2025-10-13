@@ -54,7 +54,13 @@ export default function Home() {
         {(score > 0 || problemHistory.length > 0) && <StatCard />}
 
         {showHistory && (
-          <Modal title='Problem History' onClose={() => setShowHistory(false)}>{renderHistory}</Modal>
+          <Modal
+            title='Problem History'
+            size='responsive'
+            onClose={() => setShowHistory(false)}
+          >
+            {renderHistory}
+          </Modal>
         )}
 
         {problem && <ProblemCard {...problem} />}
