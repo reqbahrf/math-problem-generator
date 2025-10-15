@@ -1,8 +1,8 @@
 'use client';
-import React from 'react';
+import React, { forwardRef } from 'react';
 import { useMathProblem } from '@/app/context/MathProblemContext';
 
-const StatCard = () => {
+const StatCard = forwardRef<HTMLButtonElement, {}>(({}, ref) => {
   const { score, problemHistory, setShowHistory } = useMathProblem();
   return (
     <div className='bg-white rounded-lg shadow-lg p-6 mb-6 dark:bg-gray-800 flex justify-between items-center'>
@@ -10,6 +10,7 @@ const StatCard = () => {
         Score: {score} / {problemHistory.length}
       </div>
       <button
+        ref={ref}
         onClick={() => setShowHistory(true)}
         className='bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600 transition'
       >
@@ -17,6 +18,6 @@ const StatCard = () => {
       </button>
     </div>
   );
-};
+});
 
 export default StatCard;

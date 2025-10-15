@@ -1,14 +1,17 @@
 'use client';
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 interface ModalProps {
   title: string;
   size: 'sm' | 'md' | 'full' | 'responsive';
+  triggerRef: React.RefObject<HTMLButtonElement>;
   onClose: () => void;
   children: React.ReactNode;
 }
 
-const Modal = ({ title, size, onClose, children }: ModalProps) => {
+const Modal = ({ title, size, triggerRef, onClose, children }: ModalProps) => {
+  const [isAnimationComplete, setIsAnimationComplete] = useState(false);
+  const modalRef = useRef<HTMLDivElement | null>(null);
   let sizeClass = '';
   switch (size) {
     case 'sm':
@@ -27,8 +30,42 @@ const Modal = ({ title, size, onClose, children }: ModalProps) => {
     default:
       break;
   }
+
+  useEffect(() => {
+    if (modalRef.current && triggerRef.current) {
+      const buttonRect = triggerRef.current.getBoundingClientRect();
+      const buttonCenterX = buttonRect.left + buttonRect.width / 2;
+      const buttonCenterY = buttonRect.top + buttonRect.height / 2;
+
+      modalRef.current.style.transformOrigin = `${buttonCenterX}px ${buttonCenterY}px`;
+      const animation = modalRef.current.animate(
+        [
+          { transform: 'scale(0)', opacity: 0, borderRadius: '40px' },
+          { transform: 'scale(1)', opacity: 1, borderRadius: '0px' },
+        ],
+        {
+          duration: 400,
+          easing: 'cubic-bezier(0.55, 0.09, 0.68, 0.53)',
+        }
+      );
+
+      animation.onfinish = () => {
+        setIsAnimationComplete(true);
+      };
+
+      return () => {
+        animation?.cancel();
+      };
+    }
+  }, []);
+
   return (
-    <div className='fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50'>
+    <div
+      ref={modalRef}
+      className={`fixed inset-0 z-50 flex items-center justify-center ${
+        isAnimationComplete ? 'bg-black bg-opacity-50' : 'bg-transparent'
+      }`}
+    >
       <div
         className={`relative ${sizeClass} overflow-y-auto bg-white dark:bg-gray-800 rounded-lg shadow-xl`}
       >

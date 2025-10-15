@@ -8,7 +8,7 @@ import ErrorCard from './components/ErrorCard';
 import StatCard from './components/stats/StatCard';
 import ViewHistoryCard from './components/stats/ViewHistoryCard';
 import Modal from './components/Modal';
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
 import ReloadWarning from './components/RealoadWarning';
 
 export default function Home() {
@@ -30,6 +30,8 @@ export default function Home() {
 
     return problemHistory.map((problem) => <ViewHistoryCard {...problem} />);
   }, [problemHistory]);
+
+  const buttonRef = useRef<HTMLButtonElement | null>(null);
   return (
     <div className='relative min-h-screen bg-gradient-to-b from-blue-50 to-white dark:bg-gradient-to-b dark:from-gray-900 dark:to-gray-800'>
       <DarkModeToggle />
@@ -51,12 +53,15 @@ export default function Home() {
           </button>
         </div>
 
-        {(score > 0 || problemHistory.length > 0) && <StatCard />}
+        {(score > 0 || problemHistory.length > 0) && (
+          <StatCard ref={buttonRef} />
+        )}
 
         {showHistory && (
           <Modal
             title='Problem History'
             size='responsive'
+            triggerRef={buttonRef}
             onClose={() => setShowHistory(false)}
           >
             {renderHistory}
