@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from 'react';
 interface ModalProps {
   title: string;
   size: 'sm' | 'md' | 'full' | 'responsive';
-  triggerRef: React.RefObject<HTMLButtonElement>;
+  triggerRef: React.RefObject<HTMLButtonElement> | undefined;
   onClose: () => void;
   children: React.ReactNode;
 }
@@ -32,12 +32,20 @@ const Modal = ({ title, size, triggerRef, onClose, children }: ModalProps) => {
   }
 
   useEffect(() => {
-    if (modalRef.current && triggerRef.current) {
-      const buttonRect = triggerRef.current.getBoundingClientRect();
-      const buttonCenterX = buttonRect.left + buttonRect.width / 2;
-      const buttonCenterY = buttonRect.top + buttonRect.height / 2;
+    if (modalRef.current) {
+      let ReferenceCenterX: number;
+      let ReferenceCenterY: number;
 
-      modalRef.current.style.transformOrigin = `${buttonCenterX}px ${buttonCenterY}px`;
+      if (triggerRef?.current) {
+        const buttonRect = triggerRef.current.getBoundingClientRect();
+        ReferenceCenterX = buttonRect.left + buttonRect.width / 2;
+        ReferenceCenterY = buttonRect.top + buttonRect.height / 2;
+      } else {
+        ReferenceCenterX = window.innerWidth / 2;
+        ReferenceCenterY = window.innerHeight / 2;
+      }
+
+      modalRef.current.style.transformOrigin = `${ReferenceCenterX}px ${ReferenceCenterY}px`;
       const animation = modalRef.current.animate(
         [
           { transform: 'scale(0)', opacity: 0, borderRadius: '40px' },
