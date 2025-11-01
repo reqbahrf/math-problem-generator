@@ -2,10 +2,17 @@
 
 import { useRouter } from 'next/navigation';
 import { motion } from 'motion/react';
+import { createNewSession } from '@/lib/sessionStorage';
 import DarkModeToggle from './components/DarkModeToggle';
 
 export default function IndexPage() {
   const router = useRouter();
+
+  const handleStart = async () => {
+    const id = await createNewSession();
+    sessionStorage.setItem('activeSession', id);
+    router.push('/generator');
+  };
 
   return (
     <div className='min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-blue-50 to-white dark:from-gray-900 dark:to-gray-800 text-gray-800 dark:text-white px-6 relative overflow-hidden'>
@@ -77,7 +84,7 @@ export default function IndexPage() {
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.98 }}
-          onClick={() => router.push('/generator')}
+          onClick={handleStart}
           className='px-8 py-4 text-lg font-semibold rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg hover:shadow-xl transition-all'
         >
           Start Practicing →
