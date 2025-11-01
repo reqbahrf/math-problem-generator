@@ -1,23 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { getAllSessions, LocalSession } from '@/lib/sessionStorage';
-import ViewHistoryCard from '@/app/components/stats/ViewHistoryCard';
 import DarkModeToggle from '@/app/components/DarkModeToggle';
 import SessionHistoryCard from '@/app/components/SessionHistoryCard';
+import useSessions from '@/app/hook/useSessions';
+import BackButton from '@/app/components/BackButton';
 
 export default function HistoryPage() {
-  const [sessions, setSessions] = useState<LocalSession[]>([]);
-  const [isGetSessionLoading, setIsGetSessionLoading] =
-    useState<boolean>(false);
-
-  useEffect(() => {
-    setIsGetSessionLoading(true);
-    getAllSessions()
-      .then(setSessions)
-      .finally(() => setIsGetSessionLoading(false));
-  }, []);
-
+  const { sessions, isGetSessionLoading } = useSessions();
   if (isGetSessionLoading) {
     return (
       <div className='min-h-screen flex items-center justify-center text-gray-600 dark:text-gray-300 p-6 md:p-8'>
@@ -30,17 +19,21 @@ export default function HistoryPage() {
     return (
       <div className='min-h-screen flex items-center justify-center text-gray-600 dark:text-gray-300 p-6 md:p-8'>
         <DarkModeToggle />
-        <p>No previous sessions found.</p>
+        <p>No previous sessions found. Go back to generate a new problem.</p>
       </div>
     );
 
   return (
     <div className='min-h-screen bg-gradient-to-b from-blue-50 to-white dark:from-gray-900 dark:to-gray-800 p-6 md:p-8'>
       <DarkModeToggle />
+
       <h1 className='text-4xl font-bold text-center mb-10 text-gray-800 dark:text-white'>
         Your Previous Sessions
       </h1>
 
+      <div className='mb-4 flex justify-end'>
+        <BackButton />
+      </div>
       <div className='space-y-10'>
         {sessions.map((session) => (
           <SessionHistoryCard
