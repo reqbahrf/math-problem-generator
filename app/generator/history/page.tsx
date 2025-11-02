@@ -4,9 +4,11 @@ import DarkModeToggle from '@/app/components/DarkModeToggle';
 import SessionHistoryCard from '@/app/components/SessionHistoryCard';
 import useSessions from '@/app/hook/useSessions';
 import BackButton from '@/app/components/BackButton';
+import useDeleteSession from '@/app/hook/useDeleteSession';
 
 export default function HistoryPage() {
-  const { sessions, isGetSessionLoading } = useSessions();
+  const { sessions, isGetSessionLoading, setSessions } = useSessions();
+  const { dlSession, dlAllSessions } = useDeleteSession(setSessions);
   if (isGetSessionLoading) {
     return (
       <div className='min-h-screen flex items-center justify-center text-gray-600 dark:text-gray-300 p-6 md:p-8'>
@@ -31,14 +33,21 @@ export default function HistoryPage() {
         Your Previous Sessions
       </h1>
 
-      <div className='mb-4 flex justify-end'>
+      <div className='mb-8 flex justify-end gap-4'>
         <BackButton />
+        <button
+          onClick={dlAllSessions}
+          className='bg-red-600 dark:bg-red-400 px-4 py-2 rounded'
+        >
+          Delete All Sessions
+        </button>
       </div>
       <div className='space-y-10'>
         {sessions.map((session) => (
           <SessionHistoryCard
             key={session.id}
             session={session}
+            dlSession={dlSession}
           />
         ))}
       </div>
