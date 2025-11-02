@@ -27,6 +27,7 @@ const ReloadWarning = () => {
     <Modal
       title='⚠️ Warning: Progress will be lost'
       size='sm'
+      triggerRef={undefined}
       onClose={() => setShowReloadWarning(false)}
     >
       <div className='text-center space-y-4'>

@@ -24,7 +24,7 @@ export default function IndexPage() {
       </div>
     );
   }
-
+  
   return (
     <div className='min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-blue-50 to-white dark:from-gray-900 dark:to-gray-800 text-gray-800 dark:text-white px-6 relative overflow-hidden'>
       <DarkModeToggle />
@@ -42,6 +42,7 @@ export default function IndexPage() {
         >
           Math Problem Generator
         </motion.h1>
+
 
         <motion.p
           initial={{ opacity: 0, y: 10 }}
