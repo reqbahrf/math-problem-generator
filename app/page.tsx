@@ -2,10 +2,28 @@
 
 import { useRouter } from 'next/navigation';
 import { motion } from 'motion/react';
+import { createNewSession } from '@/lib/sessionStorage';
 import DarkModeToggle from './components/DarkModeToggle';
+import useSessions from '@/app/hook/useSessions';
 
 export default function IndexPage() {
   const router = useRouter();
+  const { sessions, isGetSessionLoading } = useSessions();
+
+  const handleStart = async () => {
+    const id = await createNewSession();
+    sessionStorage.setItem('activeSession', id);
+    router.push('/generator');
+  };
+
+  if (isGetSessionLoading) {
+    return (
+      <div className='min-h-screen flex items-center justify-center text-gray-600 dark:text-gray-300 p-6 md:p-8'>
+        <DarkModeToggle />
+        <p>Checking your previous sessions...</p>
+      </div>
+    );
+  }
 
   return (
     <div className='min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-blue-50 to-white dark:from-gray-900 dark:to-gray-800 text-gray-800 dark:text-white px-6 relative overflow-hidden'>
@@ -74,14 +92,26 @@ export default function IndexPage() {
           </div>
         </motion.div>
 
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.98 }}
-          onClick={() => router.push('/generator')}
-          className='px-8 py-4 text-lg font-semibold rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg hover:shadow-xl transition-all'
-        >
-          Start Practicing →
-        </motion.button>
+        <div className='flex flex-col gap-4'>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={handleStart}
+            className='px-8 py-4 text-lg font-semibold rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg hover:shadow-xl transition-all'
+          >
+            Start Practicing →
+          </motion.button>
+          {sessions.length > 0 && (
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => router.push('/generator/history')}
+              className='px-8 py-4 text-md font-semibold rounded-xl text-blue-600 dark:text-white shadow-lg hover:shadow-xl transition-all'
+            >
+              View Previous Sessions →
+            </motion.button>
+          )}
+        </div>
       </main>
     </div>
   );

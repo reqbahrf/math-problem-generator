@@ -3,12 +3,13 @@ import React from 'react';
 
 interface ModalProps {
   title: string;
-  size: 'sm' | 'md' | 'full' | 'responsive';
+  size: 'sm' | 'md' | 'md-f-h' | 'full' | 'responsive';
+  headerColor?: string;
   onClose: () => void;
   children: React.ReactNode;
 }
 
-const Modal = ({ title, size, onClose, children }: ModalProps) => {
+const Modal = ({ title, size, headerColor, onClose, children }: ModalProps) => {
   let sizeClass = '';
   switch (size) {
     case 'sm':
@@ -32,7 +33,11 @@ const Modal = ({ title, size, onClose, children }: ModalProps) => {
       <div
         className={`relative ${sizeClass} overflow-y-auto bg-white dark:bg-gray-800 rounded-lg shadow-xl`}
       >
-        <div className='sticky top-0 flex justify-between items-center p-4 bg-white dark:bg-gray-800'>
+        <div
+          className={`sticky top-0 flex justify-between items-center p-4 ${
+            headerColor || 'bg-white dark:bg-gray-800'
+          }`}
+        >
           <h2 className='text-2xl text-center font-bold text-gray-700 dark:text-white'>
             {title}
           </h2>
