@@ -1,9 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { LocalSession } from '@/lib/sessionStorage';
 import { getAllSessions } from '@/lib/sessionStorage';
-import { useEffect } from 'react';
 
 const useSessions = () => {
   const [sessions, setSessions] = useState<LocalSession[]>([]);
@@ -17,6 +16,6 @@ const useSessions = () => {
       .finally(() => setIsGetSessionLoading(false));
   }, []);
 
-  return { sessions, isGetSessionLoading };
+  return { sessions, isGetSessionLoading, setSessions };
 };
 export default useSessions;
