@@ -3,13 +3,14 @@ import React, { useEffect, useRef, useState } from 'react';
 
 interface ModalProps {
   title: string;
-  size: 'sm' | 'md' | 'full' | 'responsive';
+  size: 'sm' | 'md' | 'md-f-h' | 'full' | 'responsive';
+  headerColor?: string;
   triggerRef: React.RefObject<HTMLButtonElement> | undefined;
   onClose: () => void;
   children: React.ReactNode;
 }
 
-const Modal = ({ title, size, triggerRef, onClose, children }: ModalProps) => {
+const Modal = ({ title, size, headerColor, triggerRef, onClose, children }: ModalProps) => {
   const [isAnimationComplete, setIsAnimationComplete] = useState(false);
   const modalRef = useRef<HTMLDivElement | null>(null);
   let sizeClass = '';
@@ -77,7 +78,11 @@ const Modal = ({ title, size, triggerRef, onClose, children }: ModalProps) => {
       <div
         className={`relative ${sizeClass} overflow-y-auto bg-white dark:bg-gray-800 rounded-lg shadow-xl`}
       >
-        <div className='sticky top-0 flex justify-between items-center p-4 bg-white dark:bg-gray-800'>
+        <div
+          className={`sticky top-0 flex justify-between items-center p-4 ${
+            headerColor || 'bg-white dark:bg-gray-800'
+          }`}
+        >
           <h2 className='text-2xl text-center font-bold text-gray-700 dark:text-white'>
             {title}
           </h2>

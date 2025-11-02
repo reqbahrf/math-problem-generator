@@ -1,6 +1,7 @@
 'use client';
 import React, { createContext, ReactNode, useContext, useState } from 'react';
 import { MathProblem, ProblemHistory } from '../types/problemTypes';
+import { getSession, updateSession } from '@/lib/sessionStorage';
 interface AnswerResponse {
   is_correct: boolean;
   feedback_text: string;
@@ -33,6 +34,7 @@ interface MathProblemContextType {
   generateProblem: () => Promise<void>;
   submitAnswer: (answer: string) => Promise<void>;
   error: string | null;
+  invalidateCurrentSession: () => void;
 }
 
 const MathProblemContext = createContext<MathProblemContextType | undefined>(
@@ -121,6 +123,24 @@ export const MathProblemProvider = ({ children }: { children: ReactNode }) => {
           created_at: data.created_at,
         },
       ]);
+      const currentSessionId = sessionStorage.getItem('activeSession');
+      if (currentSessionId) {
+        const localSession = await getSession(currentSessionId);
+        if (localSession) {
+          localSession.problems.push({
+            problem_text: problem?.problem_text || '',
+            user_answer: userAnswer,
+            is_correct: data.is_correct,
+            feedback: data.feedback_text,
+            solution: data.solution,
+            created_at: data.created_at,
+          });
+          localSession.score = localSession.problems.filter(
+            (p) => p.is_correct
+          ).length;
+          await updateSession(localSession);
+        }
+      }
     } catch (error) {
       setError(
         error instanceof Error ? error.message : 'Failed to submit answer'
@@ -129,6 +149,19 @@ export const MathProblemProvider = ({ children }: { children: ReactNode }) => {
     } finally {
       setIsLoading(initialLoading);
     }
+  };
+
+  const invalidateCurrentSession = (): void => {
+    setProblem(null);
+    setUserAnswer('');
+    setSessionId(null);
+    setFeedback('');
+    setIsCorrect(null);
+    setIsLoading(initialLoading);
+    setScore(0);
+    setProblemHistory([]);
+    setShowHistory(false);
+    setError(null);
   };
 
   return (
@@ -147,6 +180,7 @@ export const MathProblemProvider = ({ children }: { children: ReactNode }) => {
         generateProblem,
         submitAnswer,
         error,
+        invalidateCurrentSession,
       }}
     >
       {children}
