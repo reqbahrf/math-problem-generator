@@ -1,14 +1,18 @@
 'use client';
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 interface ModalProps {
   title: string;
-  size: 'sm' | 'md' | 'full' | 'responsive';
+  size: 'sm' | 'md' | 'md-f-h' | 'full' | 'responsive';
+  headerColor?: string;
+  triggerRef?: React.RefObject<HTMLButtonElement> | undefined;
   onClose: () => void;
   children: React.ReactNode;
 }
 
-const Modal = ({ title, size, onClose, children }: ModalProps) => {
+const Modal = ({ title, size, headerColor, triggerRef, onClose, children }: ModalProps) => {
+  const [isAnimationComplete, setIsAnimationComplete] = useState(false);
+  const modalRef = useRef<HTMLDivElement | null>(null);
   let sizeClass = '';
   switch (size) {
     case 'sm':
@@ -27,12 +31,58 @@ const Modal = ({ title, size, onClose, children }: ModalProps) => {
     default:
       break;
   }
+
+  useEffect(() => {
+    if (modalRef.current) {
+      let ReferenceCenterX: number;
+      let ReferenceCenterY: number;
+
+      if (triggerRef?.current) {
+        const buttonRect = triggerRef.current.getBoundingClientRect();
+        ReferenceCenterX = buttonRect.left + buttonRect.width / 2;
+        ReferenceCenterY = buttonRect.top + buttonRect.height / 2;
+      } else {
+        ReferenceCenterX = window.innerWidth / 2;
+        ReferenceCenterY = window.innerHeight / 2;
+      }
+
+      modalRef.current.style.transformOrigin = `${ReferenceCenterX}px ${ReferenceCenterY}px`;
+      const animation = modalRef.current.animate(
+        [
+          { transform: 'scale(0)', opacity: 0, borderRadius: '40px' },
+          { transform: 'scale(1)', opacity: 1, borderRadius: '0px' },
+        ],
+        {
+          duration: 400,
+          easing: 'cubic-bezier(0.55, 0.09, 0.68, 0.53)',
+        }
+      );
+
+      animation.onfinish = () => {
+        setIsAnimationComplete(true);
+      };
+
+      return () => {
+        animation?.cancel();
+      };
+    }
+  }, []);
+
   return (
-    <div className='fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50'>
+    <div
+      ref={modalRef}
+      className={`fixed inset-0 z-50 flex items-center justify-center ${
+        isAnimationComplete ? 'bg-black bg-opacity-50' : 'bg-transparent'
+      }`}
+    >
       <div
         className={`relative ${sizeClass} overflow-y-auto bg-white dark:bg-gray-800 rounded-lg shadow-xl`}
       >
-        <div className='sticky top-0 flex justify-between items-center p-4 bg-white dark:bg-gray-800'>
+        <div
+          className={`sticky top-0 flex justify-between items-center p-4 ${
+            headerColor || 'bg-white dark:bg-gray-800'
+          }`}
+        >
           <h2 className='text-2xl text-center font-bold text-gray-700 dark:text-white'>
             {title}
           </h2>

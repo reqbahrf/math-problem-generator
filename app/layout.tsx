@@ -4,6 +4,7 @@ import { MathProblemProvider } from './context/MathProblemContext';
 import './globals.css';
 import { themeInitScript } from '@/lib/initThemeScript';
 const inter = Inter({ subsets: ['latin'] });
+import { ModalProvider } from './context/useModalContext';
 
 export const metadata: Metadata = {
   title: 'Math Problem Generator',
@@ -20,7 +21,9 @@ export default function RootLayout({
       <body className={inter.className}>
         {/* Script to initialize theme and Prevent Flash of Unstyled Content (FOUC) */}
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
-        <MathProblemProvider>{children}</MathProblemProvider>
+        <MathProblemProvider>
+          <ModalProvider>{children}</ModalProvider>
+        </MathProblemProvider>
       </body>
     </html>
   );
