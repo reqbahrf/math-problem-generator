@@ -5,7 +5,7 @@ interface ModalProps {
   title: string;
   size: 'sm' | 'md' | 'md-f-h' | 'full' | 'responsive';
   headerColor?: string;
-  triggerRef: React.RefObject<HTMLButtonElement> | undefined;
+  triggerRef?: React.RefObject<HTMLButtonElement> | undefined;
   onClose: () => void;
   children: React.ReactNode;
 }
