@@ -1,17 +1,20 @@
 'use client';
 
-import { useState } from 'react';
+import { memo, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { LocalSession } from '@/lib/sessionStorage';
 import ViewHistoryCard from '@/app/components/stats/ViewHistoryCard';
+import { RiDeleteBin2Line } from '@remixicon/react';
 
 interface SessionHistoryCardProps {
   session: LocalSession;
+  dlSession: (e: React.MouseEvent<HTMLButtonElement>) => void;
 }
 
-export default function SessionHistoryCard({
+const SessionHistoryCard = ({
   session,
-}: SessionHistoryCardProps) {
+  dlSession,
+}: SessionHistoryCardProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const toggleDropdown = () => setIsOpen(!isOpen);
@@ -19,12 +22,12 @@ export default function SessionHistoryCard({
   return (
     <motion.div
       layout
-      className='bg-white/70 dark:bg-gray-800/70 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-shadow duration-300 backdrop-blur-sm border border-gray-200/60 dark:border-gray-700/50'
+      className='bg-white/70 dark:bg-gray-800/70 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-shadow duration-300 backdrop-blur-sm border border-gray-200/60 dark:border-gray-700/50 relative'
       whileHover={{ scale: 1.01 }}
     >
       {/* Header Section */}
       <div
-        className='flex justify-between items-center mb-4 cursor-pointer select-none'
+        className='flex justify-between items-center mb-4 cursor-pointer select-none '
         onClick={toggleDropdown}
       >
         <div>
@@ -55,7 +58,6 @@ export default function SessionHistoryCard({
             </span>
           </h3>
         </div>
-
         <motion.button
           onClick={toggleDropdown}
           className='p-2 rounded-full text-blue-600 dark:text-blue-400 hover:bg-blue-100/70 dark:hover:bg-blue-900/40 transition-colors duration-200'
@@ -78,6 +80,17 @@ export default function SessionHistoryCard({
             />
           </svg>
         </motion.button>
+        <div className='absolute top-[-10px] right-[-10px]'>
+          <motion.button
+            data-session-id={session.id}
+            onClick={dlSession}
+            className='text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-600'
+            whileHover={{ scale: 1.1 }}
+            transition={{ duration: 0.3 }}
+          >
+            <RiDeleteBin2Line />
+          </motion.button>
+        </div>
       </div>
 
       {/* Expandable History Section */}
@@ -117,4 +130,6 @@ export default function SessionHistoryCard({
       </AnimatePresence>
     </motion.div>
   );
-}
+};
+
+export default memo(SessionHistoryCard);
