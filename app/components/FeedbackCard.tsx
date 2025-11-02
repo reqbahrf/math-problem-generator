@@ -1,5 +1,5 @@
 'use client';
-import { FeedbackProps } from '@/app/types/feedbackTypes';
+import { FeedbackProps } from '@/lib/@types/feedbackTypes';
 import { memo } from 'react';
 
 const FeedbackCard = ({ isCorrect, feedback }: FeedbackProps) => {

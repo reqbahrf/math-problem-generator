@@ -1,6 +1,6 @@
 'use client';
 import React, { createContext, ReactNode, useContext, useState } from 'react';
-import { MathProblem, ProblemHistory } from '../types/problemTypes';
+import { MathProblem, ProblemHistory } from '../../lib/@types/problemTypes';
 import { getSession, updateSession } from '@/lib/sessionStorage';
 interface AnswerResponse {
   is_correct: boolean;

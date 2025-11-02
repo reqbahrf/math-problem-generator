@@ -1,7 +1,7 @@
 'use client';
 import AnswerForm from '@/app/components/problem/AnswerForm';
 import { memo } from 'react';
-import { MathProblem } from '@/app/types/problemTypes';
+import { MathProblem } from '@/lib/@types/problemTypes';
 
 const ProblemCard = (props: MathProblem) => {
   return (

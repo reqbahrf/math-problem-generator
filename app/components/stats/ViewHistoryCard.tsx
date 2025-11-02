@@ -1,5 +1,5 @@
 'use client';
-import { ProblemHistory } from '@/app/types/problemTypes';
+import { ProblemHistory } from '@/lib/@types/problemTypes';
 import React, { memo } from 'react';
 
 const ViewHistoryCard = ({
