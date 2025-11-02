@@ -34,6 +34,7 @@ interface MathProblemContextType {
   generateProblem: () => Promise<void>;
   submitAnswer: (answer: string) => Promise<void>;
   error: string | null;
+  invalidateCurrentSession: () => void;
 }
 
 const MathProblemContext = createContext<MathProblemContextType | undefined>(
@@ -150,6 +151,19 @@ export const MathProblemProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const invalidateCurrentSession = (): void => {
+    setProblem(null);
+    setUserAnswer('');
+    setSessionId(null);
+    setFeedback('');
+    setIsCorrect(null);
+    setIsLoading(initialLoading);
+    setScore(0);
+    setProblemHistory([]);
+    setShowHistory(false);
+    setError(null);
+  };
+
   return (
     <MathProblemContext.Provider
       value={{
@@ -166,6 +180,7 @@ export const MathProblemProvider = ({ children }: { children: ReactNode }) => {
         generateProblem,
         submitAnswer,
         error,
+        invalidateCurrentSession,
       }}
     >
       {children}
