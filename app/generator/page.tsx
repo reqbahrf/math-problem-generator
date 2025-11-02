@@ -7,32 +7,34 @@ import DarkModeToggle from '../components/DarkModeToggle';
 import ErrorCard from '../components/ErrorCard';
 import StatCard from '../components/stats/StatCard';
 import ViewHistoryCard from '../components/stats/ViewHistoryCard';
-import { useMemo, useEffect, useRef } from 'react';
+import { useMemo, useEffect, useRef, useState } from 'react';
 import ReloadWarning from '../components/RealoadWarning';
 import { useModalContext } from '../context/useModalContext';
 import BackButton from '../components/BackButton';
+import { useSearchParams } from 'next/navigation';
 
-export default function Home() {
+export default function Generator() {
+  const searchParams = useSearchParams();
+  const count = searchParams.get('count');
+  const gradeLevel = searchParams.get('gradeLevel');
   const {
-    generateProblem,
+    // generateProblem,
+    generateProblemBatch,
+    setGradeLevel,
     problem,
     problemHistory,
-    showHistory,
-    setShowHistory,
-    score,
     isLoading,
-    feedback,
-    isCorrect,
     error,
     invalidateCurrentSession,
   } = useMathProblem();
   const { openModal, closeModal } = useModalContext();
+  const [currentProblemIndex, setCurrentProblemIndex] = useState(0);
 
-  const renderHistory = useMemo(() => {
-    if (problemHistory.length === 0) return;
+  // const renderHistory = useMemo(() => {
+  //   if (problemHistory.length === 0) return;
 
-    return problemHistory.map((problem) => <ViewHistoryCard {...problem} />);
-  }, [problemHistory]);
+  //   return problemHistory.map((problem) => <ViewHistoryCard {...problem} />);
+  // }, [problemHistory]);
 
   const beforeBack = async (): Promise<void> => {
     return new Promise((resolve) => {
@@ -70,18 +72,34 @@ export default function Home() {
     });
   };
 
-  const triggerRef = useRef<HTMLButtonElement>(null);
+  // const triggerRef = useRef<HTMLButtonElement>(null);
   useEffect(() => {
-    if (showHistory) {
-      openModal({
-        title: 'Problem History',
-        size: 'responsive',
-        triggerRef,
-        onClose: () => setShowHistory(false),
-        children: <>{renderHistory}</>,
-      });
+    if (count && gradeLevel) {
+      generateProblemBatch(Number(count), Number(gradeLevel));
+      setGradeLevel(Number(gradeLevel));
     }
-  }, [showHistory]);
+  }, [count, gradeLevel]);
+
+  const nextProblem = () => {
+    if (currentProblemIndex < problem?.length - 1) {
+      setCurrentProblemIndex(currentProblemIndex + 1);
+    }
+  };
+
+  const prevProblem = () => {
+    if (currentProblemIndex > 0) {
+      setCurrentProblemIndex(currentProblemIndex - 1);
+    }
+  };
+
+  const renderFeedback = (question_id: string) => {
+    if (problemHistory.length === 0) return;
+    const feedback = problemHistory.find((p) => p.id === question_id);
+    return { isCorrect: feedback.is_correct, feedback: feedback.feedback };
+  };
+
+  const currentProblem = problem?.[currentProblemIndex];
+  const loading = isLoading.type === 'generate' && isLoading.isLoading;
 
   return (
     <div className='relative min-h-screen bg-gradient-to-b from-blue-50 to-white dark:bg-gradient-to-b dark:from-gray-900 dark:to-gray-800'>
@@ -89,34 +107,53 @@ export default function Home() {
       <ReloadWarning />
       <main className='container mx-auto px-4 py-8 max-w-2xl'>
         <h1 className='text-4xl font-bold text-center mb-8 text-gray-800 dark:text-white'>
-          Math Problem Generator
+          Math Problem
         </h1>
         {error && <ErrorCard error={error} />}
         <div className='mb-4 flex justify-end'>
           <BackButton beforeBack={beforeBack} />
         </div>
-        <div className='bg-white rounded-lg shadow-lg p-6 mb-6 dark:bg-gray-800'>
-          <button
-            onClick={generateProblem}
-            disabled={isLoading.type === 'generate' && isLoading.isLoading}
-            className='w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-bold py-3 px-4 rounded-lg transition duration-200 ease-in-out transform hover:scale-105'
-          >
-            {isLoading.type === 'generate' && isLoading.isLoading
-              ? 'Generating...'
-              : 'Generate New Problem'}
-          </button>
-        </div>
+        {loading ? (
+          <div className='text-center py-10 text-gray-600 dark:text-gray-300'>
+            Generating problems...
+          </div>
+        ) : currentProblem ? (
+          <>
+            <ProblemCard {...currentProblem} />
 
-        {(score > 0 || problemHistory.length > 0) && (
-          <StatCard ref={triggerRef} />
-        )}
-        {problem && <ProblemCard {...problem} />}
+            {problemHistory.length > 0 && (
+              <FeedbackCard {...renderFeedback(currentProblem.question_id)} />
+            )}
 
-        {feedback && (
-          <FeedbackCard
-            isCorrect={isCorrect}
-            feedback={feedback}
-          />
+            <div className='flex justify-between mt-6'>
+              <button
+                onClick={prevProblem}
+                disabled={currentProblemIndex === 0}
+                className={`px-4 py-2 rounded-lg ${
+                  currentProblemIndex === 0
+                    ? 'bg-gray-300 text-gray-600'
+                    : 'bg-blue-600 text-white hover:bg-blue-700'
+                }`}
+              >
+                ← Previous
+              </button>
+              <button
+                onClick={nextProblem}
+                disabled={currentProblemIndex === problem?.length - 1}
+                className={`px-4 py-2 rounded-lg ${
+                  currentProblemIndex === problem?.length - 1
+                    ? 'bg-gray-300 text-gray-600'
+                    : 'bg-blue-600 text-white hover:bg-blue-700'
+                }`}
+              >
+                Next →
+              </button>
+            </div>
+          </>
+        ) : (
+          <p className='text-center text-gray-600 dark:text-gray-400'>
+            No problems available yet.
+          </p>
         )}
       </main>
     </div>
