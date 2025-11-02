@@ -4,12 +4,19 @@ import ToggleHint from './ToggleHint';
 import { memo } from 'react';
 
 const AnswerForm = () => {
-  const { submitAnswer, isLoading, userAnswer, setUserAnswer, isCorrect } =
-    useMathProblem();
+  const {
+    submitAnswer,
+    isLoading,
+    currentProblemId,
+    gradeLevel,
+    userAnswer,
+    setUserAnswer,
+    isCorrect,
+  } = useMathProblem();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await submitAnswer(userAnswer);
+    await submitAnswer(userAnswer, currentProblemId, gradeLevel);
   };
   return (
     <>
