@@ -5,19 +5,20 @@ import { formatDate } from '@/lib/formatDate';
 import { buildFeedbackPrompt } from '@/lib/buildFeedbackPrompt';
 import PROMPT_OBJ from '@/lib/prompts/mathPrompts';
 import getModelOutput from '@/lib/Genai/googleAI';
+import { GeneratedFeedback } from '@/lib/@types/feedbackTypes';
 
 export async function POST(req: Request) {
   try {
-    const { session_id, user_answer } = await req.json();
+    const { question_id, user_answer, gradeLevel } = await req.json();
 
-    if (!session_id || !user_answer) {
+    if (!question_id || !user_answer) {
       throw new Error(ERROR_MESSAGES.INVALID_SUBMITTED_BODY);
     }
 
     const { data: session, error: sessionError } = await supabase
       .from('math_problem_sessions')
       .select('problem_text, correct_answer, step_by_step_solution, created_at')
-      .eq('id', session_id)
+      .eq('id', question_id)
       .single();
 
     if (sessionError || !session) {
@@ -28,8 +29,8 @@ export async function POST(req: Request) {
 
     const isCorrect = Number(user_answer) === Number(session.correct_answer);
 
-    const feedback = await getModelOutput(
-      buildFeedbackPrompt(PROMPT_OBJ.PERSONALIZED_FEEDBACK_PROMPT, {
+    const feedback = await getModelOutput<GeneratedFeedback>(
+      buildFeedbackPrompt(PROMPT_OBJ.generateFeedbackPrompt(gradeLevel), {
         problem_text: session.problem_text,
         user_answer,
         correct_answer: session.correct_answer,
@@ -41,7 +42,7 @@ export async function POST(req: Request) {
       .from('math_problem_submissions')
       .insert([
         {
-          session_id,
+          session_id: question_id,
           user_answer,
           is_correct: isCorrect,
           feedback_text: feedback.feedback_text,
