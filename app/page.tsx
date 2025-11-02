@@ -5,15 +5,26 @@ import { motion } from 'motion/react';
 import { createNewSession } from '@/lib/sessionStorage';
 import DarkModeToggle from './components/DarkModeToggle';
 import useSessions from '@/app/hook/useSessions';
+import ConfigForm from './components/ConfigForm';
+import { useModalContext } from './context/useModalContext';
 
 export default function IndexPage() {
   const router = useRouter();
   const { sessions, isGetSessionLoading } = useSessions();
+  const { openModal, closeModal } = useModalContext();
 
   const handleStart = async () => {
-    const id = await createNewSession();
-    sessionStorage.setItem('activeSession', id);
-    router.push('/generator');
+    openModal({
+      title: 'Configure Session',
+      headerColor: 'bg-blue-600',
+      size: 'md',
+      children: (
+        <ConfigForm
+          closeModal={closeModal}
+          router={router}
+        />
+      ),
+    });
   };
 
   if (isGetSessionLoading) {
@@ -24,7 +35,7 @@ export default function IndexPage() {
       </div>
     );
   }
-  
+
   return (
     <div className='min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-blue-50 to-white dark:from-gray-900 dark:to-gray-800 text-gray-800 dark:text-white px-6 relative overflow-hidden'>
       <DarkModeToggle />
@@ -42,7 +53,6 @@ export default function IndexPage() {
         >
           Math Problem Generator
         </motion.h1>
-
 
         <motion.p
           initial={{ opacity: 0, y: 10 }}
