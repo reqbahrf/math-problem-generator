@@ -7,7 +7,7 @@ import DarkModeToggle from '../components/DarkModeToggle';
 import ErrorCard from '../components/ErrorCard';
 import StatCard from '../components/stats/StatCard';
 import ViewHistoryCard from '../components/stats/ViewHistoryCard';
-import { useMemo, useEffect } from 'react';
+import { useMemo, useEffect, useRef } from 'react';
 import ReloadWarning from '../components/RealoadWarning';
 import { useModalContext } from '../context/useModalContext';
 import BackButton from '../components/BackButton';
@@ -70,11 +70,13 @@ export default function Home() {
     });
   };
 
+  const triggerRef = useRef<HTMLButtonElement>(null);
   useEffect(() => {
     if (showHistory) {
       openModal({
         title: 'Problem History',
         size: 'responsive',
+        triggerRef,
         onClose: () => setShowHistory(false),
         children: <>{renderHistory}</>,
       });
@@ -105,7 +107,9 @@ export default function Home() {
           </button>
         </div>
 
-        {(score > 0 || problemHistory.length > 0) && <StatCard />}
+        {(score > 0 || problemHistory.length > 0) && (
+          <StatCard ref={triggerRef} />
+        )}
         {problem && <ProblemCard {...problem} />}
 
         {feedback && (
