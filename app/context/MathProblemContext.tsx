@@ -21,7 +21,12 @@ interface LoadingState {
 }
 
 interface MathProblemContextType {
-  problem: MathProblem | null;
+  generateProblemBatch: (count: number, gradeLevel: number) => Promise<void>;
+  setCurrentProblemId: (id: string) => void;
+  setGradeLevel: (gradeLevel: number) => void;
+  gradeLevel: number;
+  currentProblemId: string;
+  problem: MathProblem[] | null;
   feedback: string;
   userAnswer: string;
   score: number;
@@ -31,8 +36,8 @@ interface MathProblemContextType {
   setUserAnswer: (answer: string) => void;
   isCorrect: boolean | null;
   isLoading: LoadingState;
-  generateProblem: () => Promise<void>;
-  submitAnswer: (answer: string) => Promise<void>;
+  // generateProblem: () => Promise<void>;
+  submitAnswer: (answer: string, question_id: string, gradeLevel: number) => Promise<void>;
   error: string | null;
   invalidateCurrentSession: () => void;
 }
@@ -47,9 +52,10 @@ const initialLoading: LoadingState = {
 };
 
 export const MathProblemProvider = ({ children }: { children: ReactNode }) => {
-  const [problem, setProblem] = useState<MathProblem | null>(null);
+  const [problem, setProblem] = useState<MathProblem[] | null>(null);
   const [userAnswer, setUserAnswer] = useState('');
-  const [sessionId, setSessionId] = useState<string | null>(null);
+  const [currentProblemId, setCurrentProblemId] = useState<string>('');
+  const [gradeLevel, setGradeLevel] = useState<number>(0);
   const [feedback, setFeedback] = useState<string>('');
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [isLoading, setIsLoading] = useState<LoadingState>(initialLoading);
@@ -60,7 +66,37 @@ export const MathProblemProvider = ({ children }: { children: ReactNode }) => {
 
   const [error, setError] = useState<string | null>(null);
 
-  const generateProblem = async () => {
+  // const generateProblem = async () => {
+  //   setProblem(null);
+  //   setUserAnswer('');
+  //   setIsLoading({ type: 'generate', isLoading: true });
+  //   setFeedback('');
+  //   setIsCorrect(null);
+  //   setError(null);
+  //   try {
+  //     const res = await fetch('/api/math-problem');
+  //     const data = (await res.json()) as MathProblemResponse;
+  //     if (!res.ok) {
+  //       throw new Error(data.error || 'Failed to generate problem');
+  //     }
+  //     setSessionId(data.session_id);
+  //     setProblem({
+  //       problem_text: data.problem_text,
+  //       problem_type: data.problem_type,
+  //       difficulty_level: data.difficulty_level,
+  //       hint: data.hint,
+  //     });
+  //   } catch (error) {
+  //     setError(
+  //       error instanceof Error ? error.message : 'Failed to generate problem'
+  //     );
+  //     console.error('Error generating math problem:', error);
+  //   } finally {
+  //     setIsLoading(initialLoading);
+  //   }
+  // };
+
+  const generateProblemBatch = async (count: number, grade: number) => {
     setProblem(null);
     setUserAnswer('');
     setIsLoading({ type: 'generate', isLoading: true });
@@ -68,29 +104,35 @@ export const MathProblemProvider = ({ children }: { children: ReactNode }) => {
     setIsCorrect(null);
     setError(null);
     try {
-      const res = await fetch('/api/math-problem');
-      const data = (await res.json()) as MathProblemResponse;
-      if (!res.ok) {
-        throw new Error(data.error || 'Failed to generate problem');
-      }
-      setSessionId(data.session_id);
-      setProblem({
-        problem_text: data.problem_text,
-        problem_type: data.problem_type,
-        difficulty_level: data.difficulty_level,
-        hint: data.hint,
+      const res = await fetch('/api/math-problem', {
+        method: 'POST',
+        body: JSON.stringify({
+          count,
+          gradeLevel: grade,
+        }),
       });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to generate problem batch');
+      }
+      setProblem(data.generatedProblems);
     } catch (error) {
       setError(
-        error instanceof Error ? error.message : 'Failed to generate problem'
+        error instanceof Error
+          ? error.message
+          : 'Failed to generate problem batch'
       );
-      console.error('Error generating math problem:', error);
+      console.error('Error generating math problem batch:', error);
     } finally {
       setIsLoading(initialLoading);
     }
   };
 
-  const submitAnswer = async (userAnswer: string) => {
+  const submitAnswer = async (
+    userAnswer: string,
+    question_id: string,
+    gradeLevel: number
+  ) => {
     setIsLoading({ type: 'submit-answer', isLoading: true });
     setFeedback('');
     setIsCorrect(null);
@@ -101,23 +143,25 @@ export const MathProblemProvider = ({ children }: { children: ReactNode }) => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          session_id: sessionId,
+          question_id: question_id,
           user_answer: userAnswer,
+          gradeLevel: gradeLevel,
         }),
       });
       const data = (await res.json()) as AnswerResponse;
       if (!res.ok) {
         throw new Error(data.error || 'Failed to submit answer');
       }
-      setIsCorrect(data.is_correct);
-      setScore((prev) => (data.is_correct ? prev + 1 : prev));
-      setFeedback(data.feedback_text);
+      const problemText = problem?.find(
+        (p) => p.question_id === question_id
+      ).problem_text;
       setProblemHistory((prev) => [
         ...prev,
         {
-          id: sessionId,
-          problem_text: problem?.problem_text || '',
+          id: question_id,
+          problem_text: problemText || '',
           user_answer: userAnswer,
+          feedback: data.feedback_text,
           is_correct: data.is_correct,
           solution: data.solution,
           created_at: data.created_at,
@@ -128,7 +172,7 @@ export const MathProblemProvider = ({ children }: { children: ReactNode }) => {
         const localSession = await getSession(currentSessionId);
         if (localSession) {
           localSession.problems.push({
-            problem_text: problem?.problem_text || '',
+            problem_text: problemText || '',
             user_answer: userAnswer,
             is_correct: data.is_correct,
             feedback: data.feedback_text,
@@ -154,7 +198,7 @@ export const MathProblemProvider = ({ children }: { children: ReactNode }) => {
   const invalidateCurrentSession = (): void => {
     setProblem(null);
     setUserAnswer('');
-    setSessionId(null);
+    setCurrentProblemId('');
     setFeedback('');
     setIsCorrect(null);
     setIsLoading(initialLoading);
@@ -167,6 +211,11 @@ export const MathProblemProvider = ({ children }: { children: ReactNode }) => {
   return (
     <MathProblemContext.Provider
       value={{
+        generateProblemBatch,
+        setCurrentProblemId,
+        currentProblemId,
+        gradeLevel,
+        setGradeLevel,
         userAnswer,
         setUserAnswer,
         score,
@@ -177,7 +226,7 @@ export const MathProblemProvider = ({ children }: { children: ReactNode }) => {
         feedback,
         isCorrect,
         isLoading,
-        generateProblem,
+        // generateProblem,
         submitAnswer,
         error,
         invalidateCurrentSession,
