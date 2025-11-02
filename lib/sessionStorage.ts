@@ -74,3 +74,15 @@ export async function updateSession(session: LocalSession): Promise<void> {
   const tx = db.transaction(STORAGE_NAME, 'readwrite');
   tx.objectStore(STORAGE_NAME).put(session);
 }
+
+export async function deleteSession(id: string): Promise<void> {
+  const db = await initDB();
+  const tx = db.transaction(STORAGE_NAME, 'readwrite');
+  tx.objectStore(STORAGE_NAME).delete(id);
+}
+
+export async function deleteAllSessions(): Promise<void> {
+  const db = await initDB();
+  const tx = db.transaction(STORAGE_NAME, 'readwrite');
+  tx.objectStore(STORAGE_NAME).clear();
+}
