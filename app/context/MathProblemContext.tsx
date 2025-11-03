@@ -1,6 +1,16 @@
 'use client';
-import React, { createContext, ReactNode, useContext, useState } from 'react';
-import { MathProblem, ProblemHistory } from '../../lib/@types/problemTypes';
+import React, {
+  createContext,
+  ReactNode,
+  useCallback,
+  useContext,
+  useState,
+} from 'react';
+import {
+  MathProblem,
+  MathProblemState,
+  ProblemSessionConfigState,
+} from '../../lib/@types/problemTypes';
 import { getSession, updateSession } from '@/lib/sessionStorage';
 interface AnswerResponse {
   is_correct: boolean;
@@ -10,8 +20,8 @@ interface AnswerResponse {
   error?: string;
 }
 
-interface MathProblemResponse extends MathProblem {
-  session_id: string;
+interface MathProblemResponse {
+  generatedProblems: MathProblem[];
   error?: string;
 }
 
@@ -22,22 +32,22 @@ interface LoadingState {
 
 interface MathProblemContextType {
   generateProblemBatch: (count: number, gradeLevel: number) => Promise<void>;
-  setCurrentProblemId: (id: string) => void;
-  setGradeLevel: (gradeLevel: number) => void;
-  gradeLevel: number;
+  setCurrentProblemId: React.Dispatch<React.SetStateAction<string>>;
+  setProblemSessionConfig: React.Dispatch<
+    React.SetStateAction<ProblemSessionConfigState>
+  >;
+  setProblem: React.Dispatch<React.SetStateAction<MathProblemState[] | null>>;
+  problemSessionConfig: ProblemSessionConfigState;
   currentProblemId: string;
-  problem: MathProblem[] | null;
-  feedback: string;
-  userAnswer: string;
+  problem: MathProblemState[] | null;
   score: number;
-  problemHistory: ProblemHistory[];
-  showHistory: boolean;
-  setShowHistory: (show: boolean) => void;
-  setUserAnswer: (answer: string) => void;
-  isCorrect: boolean | null;
   isLoading: LoadingState;
   // generateProblem: () => Promise<void>;
-  submitAnswer: (answer: string, question_id: string, gradeLevel: number) => Promise<void>;
+  submitAnswer: (
+    answer: string,
+    question_id: string,
+    gradeLevel: number
+  ) => Promise<void>;
   error: string | null;
   invalidateCurrentSession: () => void;
 }
