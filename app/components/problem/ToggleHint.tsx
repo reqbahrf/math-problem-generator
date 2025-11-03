@@ -4,7 +4,7 @@ import { useState } from 'react';
 
 const ToggleHint = () => {
   const [showHint, setShowHint] = useState(false);
-  const { problem } = useMathProblem();
+  const { problem, currentProblemId } = useMathProblem();
 
   return (
     <div className='space-y-2'>
@@ -16,7 +16,7 @@ const ToggleHint = () => {
         }`}
       >
         <div className='text-gray-600 dark:text-gray-400 text-sm'>
-          hint: {problem?.hint}
+          hint: {problem?.find((p) => p.question_id === currentProblemId)?.hint}
         </div>
       </div>
       <div className='flex justify-end'>
