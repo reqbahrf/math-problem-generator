@@ -24,15 +24,15 @@ export interface MathProblemState extends MathProblem {
   createdAt: string | null;
 }
 
-// export interface ProblemHistory {
-//   id: string;
-//   problem_text: string;
-//   user_answer: string;
-//   feedback: string;
-//   is_correct: boolean;
-//   solution: string;
-//   created_at: string;
-// }
+export interface ProblemHistory {
+  id: string;
+  problemText: string;
+  userAnswer: string | null;
+  feedback: string | null;
+  isCorrect: boolean | null;
+  solution: string | null;
+  createdAt: string | null;
+}
 
 export interface ProblemSessionConfigState {
   count: number;
