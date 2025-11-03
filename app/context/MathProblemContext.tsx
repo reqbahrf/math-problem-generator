@@ -11,7 +11,7 @@ import {
   MathProblemState,
   ProblemSessionConfigState,
 } from '../../lib/@types/problemTypes';
-import { getSession, updateSession } from '@/lib/sessionStorage';
+import { getSession, LocalSession, updateSession } from '@/lib/sessionStorage';
 interface AnswerResponse {
   is_correct: boolean;
   feedback_text: string;
@@ -42,7 +42,7 @@ interface MathProblemContextType {
   problem: MathProblemState[] | null;
   score: number;
   isLoading: LoadingState;
-  // generateProblem: () => Promise<void>;
+  resumeSavedSession: (session: LocalSession) => void;
   submitAnswer: (
     answer: string,
     question_id: string,
@@ -216,6 +216,31 @@ export const MathProblemProvider = ({ children }: { children: ReactNode }) => {
     []
   );
 
+  const resumeSavedSession = useCallback(async (session: LocalSession) => {
+    setProblem(
+      session.problems.map((p) => ({
+        question_id: p.questionId,
+        problem_text: p.problemText,
+        problem_type: p.problemType,
+        difficulty_level: p.difficultyLevel,
+        hint: p.hint,
+        solution: p.solution,
+        isAnswered: p.userAnswer ? true : false,
+        userAnswer: p.userAnswer,
+        isCorrect: p.isCorrect,
+        feedback: p.feedback,
+        createdAt: p.createdAt,
+      }))
+    );
+    setCurrentProblemId(
+      session.problems.find((p) => !p.userAnswer)?.questionId ?? null
+    );
+    setProblemSessionConfig({
+      count: session.count,
+      gradeLevel: session.gradeLevel,
+    });
+  }, []);
+
   const invalidateCurrentSession = (): void => {
     setProblem(null);
     setCurrentProblemId('');
@@ -239,6 +264,7 @@ export const MathProblemProvider = ({ children }: { children: ReactNode }) => {
         submitAnswer,
         error,
         invalidateCurrentSession,
+        resumeSavedSession,
       }}
     >
       {children}
