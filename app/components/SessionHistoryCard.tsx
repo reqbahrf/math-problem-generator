@@ -1,10 +1,12 @@
 'use client';
 
-import { memo, useState } from 'react';
+import { memo, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { LocalSession } from '@/lib/sessionStorage';
 import ViewHistoryCard from '@/app/components/stats/ViewHistoryCard';
-import { RiDeleteBin2Line } from '@remixicon/react';
+import { RiDeleteBin2Line, RiPlayCircleLine } from '@remixicon/react';
+import { useModalContext } from '@/app/context/useModalContext';
+import SessionResumeNotice from '@/app/components/modalBody/SessionResumeNotice';
 
 interface SessionHistoryCardProps {
   session: LocalSession;
@@ -16,8 +18,35 @@ const SessionHistoryCard = ({
   dlSession,
 }: SessionHistoryCardProps) => {
   const [isOpen, setIsOpen] = useState(false);
+  const { openModal, closeModal } = useModalContext();
 
   const toggleDropdown = () => setIsOpen(!isOpen);
+
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const numberOfAnsweredQuestions = session.problems.filter(
+    (p) => p.userAnswer !== null
+  ).length;
+  const problemCount = session.problems.length;
+
+  const handleResumeSession = async (
+    e: React.MouseEvent<HTMLButtonElement>
+  ) => {
+    e.stopPropagation();
+    const id = e.currentTarget.dataset.sessionId;
+    if (!id) return;
+    openModal({
+      title: 'Confirm',
+      headerColor: 'bg-red-600 dark:bg-red-400',
+      children: (
+        <SessionResumeNotice
+          sessionId={id}
+          closeModal={closeModal}
+        />
+      ),
+      size: 'md',
+      triggerRef,
+    });
+  };
 
   return (
     <motion.div
@@ -30,7 +59,7 @@ const SessionHistoryCard = ({
         className='flex justify-between items-center mb-4 cursor-pointer select-none '
         onClick={toggleDropdown}
       >
-        <div>
+        <div className='w-full'>
           <h1 className='text-2xl font-semibold text-gray-800 dark:text-gray-100 flex items-center gap-2'>
             🧮 Session{' '}
             <span className='text-blue-600 dark:text-blue-400 truncate max-w-[150px] sm:max-w-[250px]'>
@@ -77,6 +106,19 @@ const SessionHistoryCard = ({
               </span>
             </div>
           </div>
+          <div className='mt-2 text-md font-medium text-gray-700 dark:text-gray-300'>
+            Progress: {numberOfAnsweredQuestions} / {problemCount} (
+            {((numberOfAnsweredQuestions / problemCount) * 100).toFixed(2)}
+            %)
+            <div className='w-full h-1 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden'>
+              <div
+                className='h-full bg-blue-600 dark:bg-blue-400'
+                style={{
+                  width: `${(numberOfAnsweredQuestions / problemCount) * 100}%`,
+                }}
+              />
+            </div>
+          </div>
         </div>
         <motion.button
           onClick={toggleDropdown}
@@ -101,6 +143,18 @@ const SessionHistoryCard = ({
           </svg>
         </motion.button>
         <div className='absolute top-[-10px] right-[-10px]'>
+          {session.status === 'Incomplete' && (
+            <motion.button
+              ref={triggerRef}
+              data-session-id={session.id}
+              onClick={handleResumeSession}
+              className='text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-600'
+              whileHover={{ scale: 1.1 }}
+              transition={{ duration: 0.3 }}
+            >
+              <RiPlayCircleLine size={32} />
+            </motion.button>
+          )}
           <motion.button
             data-session-id={session.id}
             onClick={dlSession}
@@ -108,7 +162,7 @@ const SessionHistoryCard = ({
             whileHover={{ scale: 1.1 }}
             transition={{ duration: 0.3 }}
           >
-            <RiDeleteBin2Line />
+            <RiDeleteBin2Line size={32} />
           </motion.button>
         </div>
       </div>
