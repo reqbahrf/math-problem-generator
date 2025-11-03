@@ -68,7 +68,6 @@ export const MathProblemProvider = ({ children }: { children: ReactNode }) => {
       gradeLevel: 0,
     });
   const [problem, setProblem] = useState<MathProblemState[] | null>(null);
-  const [userAnswer, setUserAnswer] = useState('');
   const [currentProblemId, setCurrentProblemId] = useState<string>('');
   const [isLoading, setIsLoading] = useState<LoadingState>(initialLoading);
 
@@ -79,7 +78,6 @@ export const MathProblemProvider = ({ children }: { children: ReactNode }) => {
   const generateProblemBatch = useCallback(
     async (count: number, grade: number) => {
       setProblem(null);
-      setUserAnswer('');
       setIsLoading({ type: 'generate', isLoading: true });
       setError(null);
       try {
@@ -159,9 +157,6 @@ export const MathProblemProvider = ({ children }: { children: ReactNode }) => {
         if (!res.ok) {
           throw new Error(data.error || 'Failed to submit answer');
         }
-        const answeredProblem = problem.find(
-          (p) => p.question_id === question_id
-        );
         setProblem((prev) =>
           prev.map((p) => {
             if (p.question_id === question_id) {
@@ -215,12 +210,11 @@ export const MathProblemProvider = ({ children }: { children: ReactNode }) => {
         setIsLoading(initialLoading);
       }
     },
-    [problem]
+    []
   );
 
   const invalidateCurrentSession = (): void => {
     setProblem(null);
-    setUserAnswer('');
     setCurrentProblemId('');
     setIsLoading(initialLoading);
     setScore(0);
