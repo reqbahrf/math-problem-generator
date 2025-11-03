@@ -106,6 +106,26 @@ export const MathProblemProvider = ({ children }: { children: ReactNode }) => {
           }))
         );
         setCurrentProblemId(data.generatedProblems[0].question_id);
+        const currentSessionId = sessionStorage.getItem('activeSession');
+        if (currentSessionId) {
+          const localSession = await getSession(currentSessionId);
+          if (localSession) {
+            for (const p of data.generatedProblems) {
+              localSession.problems.push({
+                questionId: p.question_id,
+                problemText: p.problem_text,
+                userAnswer: null,
+                isCorrect: null,
+                feedback: null,
+                solution: null,
+                createdAt: null,
+              });
+            }
+            localSession.count = count;
+            localSession.gradeLevel = grade;
+            await updateSession(localSession);
+          }
+        }
       } catch (error) {
         setError(
           error instanceof Error
@@ -162,17 +182,27 @@ export const MathProblemProvider = ({ children }: { children: ReactNode }) => {
         if (currentSessionId) {
           const localSession = await getSession(currentSessionId);
           if (localSession) {
-            localSession.problems.push({
-              problem_text: answeredProblem?.problem_text || '',
-              user_answer: userAnswer,
-              is_correct: data.is_correct,
-              feedback: data.feedback_text,
-              solution: data.solution,
-              created_at: data.created_at,
-            });
+            const problemIndex = localSession.problems.findIndex(
+              (p) => p.questionId === question_id
+            );
+            if (problemIndex !== -1) {
+              localSession.problems[problemIndex] = {
+                ...localSession.problems[problemIndex],
+                userAnswer: userAnswer,
+                isCorrect: data.is_correct,
+                feedback: data.feedback_text,
+                solution: data.solution,
+                createdAt: data.created_at,
+              };
+            }
             localSession.score = localSession.problems.filter(
-              (p) => p.is_correct
+              (p) => p.isCorrect
             ).length;
+            localSession.status = localSession.problems.every(
+              (p) => p.userAnswer !== null
+            )
+              ? 'Completed'
+              : 'Incomplete';
             await updateSession(localSession);
           }
         }
