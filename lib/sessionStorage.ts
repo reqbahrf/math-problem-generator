@@ -8,13 +8,17 @@ export interface LocalSession {
   id: string;
   createdAt: string;
   problems: {
-    problem_text: string;
-    user_answer: string;
-    is_correct: boolean;
+    questionId: string;
+    problemText: string;
+    userAnswer: string;
+    isCorrect: boolean;
     feedback: string;
     solution: string;
-    created_at: string;
+    createdAt: string;
   }[];
+  gradeLevel: number;
+  count: number;
+  status: 'Incomplete' | 'Completed';
   score: number;
 }
 
@@ -43,6 +47,9 @@ export async function createNewSession(): Promise<string> {
     id,
     createdAt: new Date().toISOString(),
     problems: [],
+    gradeLevel: 0,
+    count: 0,
+    status: 'Incomplete',
     score: 0,
   };
   store.put(newSession);
