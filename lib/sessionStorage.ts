@@ -10,6 +10,9 @@ export interface LocalSession {
   problems: {
     questionId: string;
     problemText: string;
+    problemType: string;
+    difficultyLevel: string;
+    hint: string;
     userAnswer: string;
     isCorrect: boolean;
     feedback: string;

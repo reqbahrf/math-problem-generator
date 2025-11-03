@@ -112,6 +112,9 @@ export const MathProblemProvider = ({ children }: { children: ReactNode }) => {
               localSession.problems.push({
                 questionId: p.question_id,
                 problemText: p.problem_text,
+                problemType: p.problem_type,
+                difficultyLevel: p.difficulty_level,
+                hint: p.hint,
                 userAnswer: null,
                 isCorrect: null,
                 feedback: null,
