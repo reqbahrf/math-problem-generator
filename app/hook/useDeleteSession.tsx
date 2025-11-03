@@ -2,7 +2,9 @@ import { deleteSession, deleteAllSessions } from '@/lib/sessionStorage';
 import { useModalContext } from '../context/useModalContext';
 import { useCallback } from 'react';
 
-const useDeleteSession = (setSessions: React.Dispatch<React.SetStateAction<any[]>>) => {
+const useDeleteSession = (
+  setSessions: React.Dispatch<React.SetStateAction<any[]>>
+) => {
   const { openModal, closeModal } = useModalContext();
 
   const dlSession = useCallback(
@@ -44,7 +46,7 @@ const useDeleteSession = (setSessions: React.Dispatch<React.SetStateAction<any[]
         size: 'md',
       });
     },
-    []
+    [openModal, closeModal, setSessions]
   );
 
   const dlAllSessions = useCallback(async () => {
@@ -79,7 +81,7 @@ const useDeleteSession = (setSessions: React.Dispatch<React.SetStateAction<any[]
       ),
       size: 'md',
     });
-  }, []);
+  }, [openModal, closeModal, setSessions]);
 
   return { dlSession, dlAllSessions };
 };
