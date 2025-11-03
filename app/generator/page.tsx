@@ -6,14 +6,13 @@ import ProblemCard from '../components/problem/ProblemCard';
 import DarkModeToggle from '../components/DarkModeToggle';
 import ErrorCard from '../components/ErrorCard';
 import StatCard from '../components/stats/StatCard';
-import ViewHistoryCard from '../components/stats/ViewHistoryCard';
-import { useMemo, useEffect, useRef, useState } from 'react';
-import ReloadWarning from '../components/RealoadWarning';
+import { Suspense, useEffect, useRef, useState } from 'react';
 import { useModalContext } from '../context/useModalContext';
 import BackButton from '../components/BackButton';
 import { useSearchParams } from 'next/navigation';
+import Loading from '../components/Loading';
 
-export default function Generator() {
+function GeneratorInner() {
   const searchParams = useSearchParams();
   const count = searchParams.get('count');
   const gradeLevel = searchParams.get('gradeLevel');
@@ -104,7 +103,6 @@ export default function Generator() {
   return (
     <div className='relative min-h-screen bg-gradient-to-b from-blue-50 to-white dark:bg-gradient-to-b dark:from-gray-900 dark:to-gray-800'>
       <DarkModeToggle />
-      <ReloadWarning />
       <main className='container mx-auto px-4 py-8 max-w-2xl'>
         <h1 className='text-4xl font-bold text-center mb-8 text-gray-800 dark:text-white'>
           Math Problem
@@ -181,5 +179,13 @@ export default function Generator() {
         )}
       </main>
     </div>
+  );
+}
+
+export default function Generator() {
+  return (
+    <Suspense fallback={<Loading message='Loading problem generator...' />}>
+      <GeneratorInner />
+    </Suspense>
   );
 }
