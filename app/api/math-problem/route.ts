@@ -4,12 +4,14 @@ import { supabase } from '@/lib/supabaseClient';
 import PROMPT_OBJ from '@/lib/prompts/mathPrompts';
 import { ERROR_MESSAGES } from '@/lib/constants/errorMessages';
 import getModelOutput from '@/lib/Genai/googleAI';
+import mockProblems from '@/lib/constants/sampleProblemRes';
 
 export async function POST(req: Request) {
   try {
     const { count, gradeLevel } = await req.json();
     const prompt = PROMPT_OBJ.generateMathProblemPrompt(gradeLevel, count);
-    const result = await getModelOutput(prompt);
+    // const result = await getModelOutput(prompt);
+    const result = mockProblems;
     const problems = Array.isArray(result) ? result : [result];
     console.log('problems', problems);
     if (
