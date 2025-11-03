@@ -50,12 +50,13 @@ const useModal = (): UseModalReturn => {
 
   const modal = isOpen ? (
     <Modal
-      children={modalContent!}
       size={size}
       title={modalTitle}
       headerColor={modalHeaderColor}
       onClose={onCloseCallback || closeModal}
-    />
+    >
+      {modalContent!}
+    </Modal>
   ) : null;
 
   return { modal, openModal, closeModal };

@@ -10,7 +10,14 @@ interface ModalProps {
   children: React.ReactNode;
 }
 
-const Modal = ({ title, size, headerColor, triggerRef, onClose, children }: ModalProps) => {
+const Modal = ({
+  title,
+  size,
+  headerColor,
+  triggerRef,
+  onClose,
+  children,
+}: ModalProps) => {
   const [isAnimationComplete, setIsAnimationComplete] = useState(false);
   const modalRef = useRef<HTMLDivElement | null>(null);
   let sizeClass = '';
@@ -66,7 +73,7 @@ const Modal = ({ title, size, headerColor, triggerRef, onClose, children }: Moda
         animation?.cancel();
       };
     }
-  }, []);
+  }, [triggerRef]);
 
   return (
     <div
