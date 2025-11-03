@@ -11,13 +11,14 @@ import { useModalContext } from '../context/useModalContext';
 import BackButton from '../components/BackButton';
 import { useSearchParams } from 'next/navigation';
 import Loading from '../components/Loading';
+import { getSession } from '@/lib/sessionStorage';
 
 function GeneratorInner() {
   const searchParams = useSearchParams();
   const count = searchParams.get('count');
+  const isResume = searchParams.get('resume') === 'true' || false;
   const gradeLevel = searchParams.get('gradeLevel');
   const {
-    // generateProblem,
     setCurrentProblemId,
     generateProblemBatch,
     setProblemSessionConfig,
@@ -25,6 +26,7 @@ function GeneratorInner() {
     isLoading,
     error,
     invalidateCurrentSession,
+    resumeSavedSession,
   } = useMathProblem();
   const { openModal, closeModal } = useModalContext();
   const [currentProblemIndex, setCurrentProblemIndex] = useState(0);
@@ -67,7 +69,19 @@ function GeneratorInner() {
 
   const hasGeneratedRef = useRef(false);
   useEffect(() => {
-    if (count && gradeLevel && !hasGeneratedRef.current) {
+    if (isResume) {
+      const currentSessionId = sessionStorage.getItem('activeSession');
+      if (currentSessionId) {
+        getSession(currentSessionId).then((localSession) => {
+          if (localSession) {
+            resumeSavedSession(localSession);
+          }
+        });
+      }
+    }
+  }, [isResume, resumeSavedSession]);
+  useEffect(() => {
+    if (count && gradeLevel && !hasGeneratedRef.current && !isResume) {
       generateProblemBatch(Number(count), Number(gradeLevel));
       setProblemSessionConfig({
         count: Number(count),
@@ -75,7 +89,13 @@ function GeneratorInner() {
       });
       hasGeneratedRef.current = true;
     }
-  }, [count, gradeLevel, generateProblemBatch, setProblemSessionConfig]);
+  }, [
+    count,
+    gradeLevel,
+    generateProblemBatch,
+    setProblemSessionConfig,
+    isResume,
+  ]);
 
   const nextProblem = () => {
     if (currentProblemIndex < problem?.length - 1) {
