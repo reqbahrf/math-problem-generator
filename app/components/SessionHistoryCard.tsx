@@ -57,6 +57,26 @@ const SessionHistoryCard = ({
               {session.score} / {session.problems.length}
             </span>
           </h3>
+          <div className='flex gap-4 ps-4 text-md font-medium text-gray-700 dark:text-gray-300'>
+            <div>
+              Problem Level:{' '}
+              <span className='text-gray-500 dark:text-gray-400'>
+                Grade {session.gradeLevel}
+              </span>
+            </div>
+            <div>
+              Status:{' '}
+              <span
+                className={`text-blue-600 dark:text-blue-400 ${
+                  session.status === 'Completed'
+                    ? 'text-green-600 dark:text-green-400'
+                    : 'text-red-600 dark:text-red-400'
+                }`}
+              >
+                {session.status}
+              </span>
+            </div>
+          </div>
         </div>
         <motion.button
           onClick={toggleDropdown}
