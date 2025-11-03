@@ -19,22 +19,16 @@ export default function Generator() {
   const gradeLevel = searchParams.get('gradeLevel');
   const {
     // generateProblem,
+    setCurrentProblemId,
     generateProblemBatch,
-    setGradeLevel,
+    setProblemSessionConfig,
     problem,
-    problemHistory,
     isLoading,
     error,
     invalidateCurrentSession,
   } = useMathProblem();
   const { openModal, closeModal } = useModalContext();
   const [currentProblemIndex, setCurrentProblemIndex] = useState(0);
-
-  // const renderHistory = useMemo(() => {
-  //   if (problemHistory.length === 0) return;
-
-  //   return problemHistory.map((problem) => <ViewHistoryCard {...problem} />);
-  // }, [problemHistory]);
 
   const beforeBack = async (): Promise<void> => {
     return new Promise((resolve) => {
@@ -72,30 +66,36 @@ export default function Generator() {
     });
   };
 
-  // const triggerRef = useRef<HTMLButtonElement>(null);
+  const hasGeneratedRef = useRef(false);
   useEffect(() => {
-    if (count && gradeLevel) {
+    if (count && gradeLevel && !hasGeneratedRef.current) {
       generateProblemBatch(Number(count), Number(gradeLevel));
-      setGradeLevel(Number(gradeLevel));
+      setProblemSessionConfig({
+        count: Number(count),
+        gradeLevel: Number(gradeLevel),
+      });
+      hasGeneratedRef.current = true;
     }
-  }, [count, gradeLevel]);
+  }, [count, gradeLevel, generateProblemBatch, setProblemSessionConfig]);
 
   const nextProblem = () => {
     if (currentProblemIndex < problem?.length - 1) {
+      setCurrentProblemId(problem?.[currentProblemIndex + 1].question_id);
       setCurrentProblemIndex(currentProblemIndex + 1);
     }
   };
 
   const prevProblem = () => {
     if (currentProblemIndex > 0) {
+      setCurrentProblemId(problem?.[currentProblemIndex - 1].question_id);
       setCurrentProblemIndex(currentProblemIndex - 1);
     }
   };
 
   const renderFeedback = (question_id: string) => {
-    if (problemHistory.length === 0) return;
-    const feedback = problemHistory.find((p) => p.id === question_id);
-    return { isCorrect: feedback.is_correct, feedback: feedback.feedback };
+    if (problem?.length === 0) return;
+    const feedback = problem?.find((p) => p.question_id === question_id);
+    return { isCorrect: feedback.isCorrect, feedback: feedback.feedback };
   };
 
   const currentProblem = problem?.[currentProblemIndex];
@@ -113,6 +113,9 @@ export default function Generator() {
         <div className='mb-4 flex justify-end'>
           <BackButton beforeBack={beforeBack} />
         </div>
+        <div className='mb-4 flex justify-center w-full'>
+          <StatCard />
+        </div>
         {loading ? (
           <div className='text-center py-10 text-gray-600 dark:text-gray-300'>
             Generating problems...
@@ -121,9 +124,24 @@ export default function Generator() {
           <>
             <ProblemCard {...currentProblem} />
 
-            {problemHistory.length > 0 && (
-              <FeedbackCard {...renderFeedback(currentProblem.question_id)} />
-            )}
+            {currentProblem &&
+              currentProblem.isAnswered &&
+              currentProblem.feedback && (
+                <FeedbackCard {...renderFeedback(currentProblem.question_id)} />
+              )}
+
+            <div className='w-full h-1 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden'>
+              <div
+                className='h-full bg-blue-600 dark:bg-blue-400'
+                style={{
+                  width: `${
+                    (problem?.filter((p) => p.isAnswered).length /
+                      problem?.length) *
+                    100
+                  }%`,
+                }}
+              />
+            </div>
 
             <div className='flex justify-between mt-6'>
               <button
@@ -137,14 +155,20 @@ export default function Generator() {
               >
                 ← Previous
               </button>
+              <div className='text-center text-gray-600 dark:text-gray-300 mb-4'>
+                {currentProblemIndex + 1}/{problem?.length}
+              </div>
               <button
                 onClick={nextProblem}
-                disabled={currentProblemIndex === problem?.length - 1}
+                disabled={
+                  currentProblemIndex === problem?.length - 1 ||
+                  !currentProblem.isAnswered
+                }
                 className={`px-4 py-2 rounded-lg ${
                   currentProblemIndex === problem?.length - 1
                     ? 'bg-gray-300 text-gray-600'
                     : 'bg-blue-600 text-white hover:bg-blue-700'
-                }`}
+                } disabled:text-gray-600 disabled:opacity-50 disabled:hover:text-gray-600 disabled:bg-gray-300`}
               >
                 Next →
               </button>
