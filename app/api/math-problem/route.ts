@@ -25,11 +25,11 @@ export async function POST(req: Request) {
       .from('math_problem_sessions')
       .insert(
         problems.map((p) => ({
-          problem_text: p.problem_text,
-          correct_answer: p.final_answer,
-          problem_type: p.problem_type,
-          difficulty_level: p.difficulty_level,
-          step_by_step_solution: p.step_by_step_solution,
+          problem_text: p.problemText,
+          correct_answer: p.finalAnswer,
+          problem_type: p.problemType,
+          difficulty_level: p.difficultyLevel,
+          step_by_step_solution: p.stepByStepSolution,
           hint: p.hint,
         }))
       )
@@ -39,9 +39,9 @@ export async function POST(req: Request) {
 
     const generatedProblems = data.map((p) => ({
       question_id: p.id,
-      problem_text: p.problem_text,
-      problem_type: p.problem_type,
-      difficulty_level: p.difficulty_level,
+      problemText: p.problem_text,
+      problemType: p.problem_type,
+      difficultyLevel: p.difficulty_level,
       hint: p.hint,
     }));
 

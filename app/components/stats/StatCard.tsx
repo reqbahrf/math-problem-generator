@@ -16,12 +16,12 @@ const StatCard = () => {
       <ProblemStatCard
         key={p.question_id}
         questionId={p.question_id}
-        problemText={p.problem_text}
-        difficultyLevel={p.difficulty_level}
+        problemText={p.problemText}
+        difficultyLevel={p.difficultyLevel}
         feedback={p.feedback}
         userAnswer={p.userAnswer}
         isCorrect={p.isCorrect}
-        problemType={p.problem_type}
+        problemType={p.problemType}
         solution={p.solution}
         createdAt={p.createdAt}
       />

@@ -31,10 +31,10 @@ export async function POST(req: Request) {
 
     const feedback = await getModelOutput<GeneratedFeedback>(
       buildFeedbackPrompt(PROMPT_OBJ.generateFeedbackPrompt(gradeLevel), {
-        problem_text: session.problem_text,
+        problemText: session.problem_text,
         user_answer,
         correct_answer: session.correct_answer,
-        step_by_step_solution: session.step_by_step_solution,
+        stepByStepSolution: session.step_by_step_solution,
       })
     );
 
@@ -45,17 +45,17 @@ export async function POST(req: Request) {
           session_id: question_id,
           user_answer,
           is_correct: isCorrect,
-          feedback_text: feedback.feedback_text,
+          feedback_text: feedback.feedbackText,
         },
       ]);
 
     if (insertError) throw insertError;
 
-    if (!feedback.feedback_text)
+    if (!feedback.feedbackText)
       throw new Error(ERROR_MESSAGES.INVALID_AI_RESPONSE);
     return NextResponse.json({
       is_correct: isCorrect,
-      feedback_text: feedback.feedback_text,
+      feedback_text: feedback.feedbackText,
       solution: session.step_by_step_solution,
       created_at: formatDate(session.created_at),
     });

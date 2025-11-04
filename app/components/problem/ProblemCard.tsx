@@ -12,7 +12,7 @@ const ProblemCard = (props: MathProblem) => {
         </h2>
         <div className='flex gap-2 mb-4'>
           <span className='text-sm bg-blue-500 font-semibold mb-2 text-gray-700 dark:text-white rounded-full px-2 py-1'>
-            Type: {props.problem_type}
+            Type: {props.problemType}
           </span>
           <span
             className={`text-sm font-semibold mb-2 rounded-full px-2 py-1 ${
@@ -20,14 +20,14 @@ const ProblemCard = (props: MathProblem) => {
                 Easy: 'bg-green-200 text-green-800',
                 Medium: 'bg-yellow-200 text-yellow-800',
                 Hard: 'bg-red-200 text-red-800',
-              }[props.difficulty_level] || 'bg-gray-200 text-gray-800'
+              }[props.difficultyLevel] || 'bg-gray-200 text-gray-800'
             }`}
           >
-            Level: {props.difficulty_level}
+            Level: {props.difficultyLevel}
           </span>
         </div>
         <p className='text-lg text-gray-800 dark:text-white leading-relaxed mb-6'>
-          {props.problem_text}
+          {props.problemText}
         </p>
         <AnswerForm />
       </div>

@@ -14,7 +14,7 @@ import {
 import { getSession, LocalSession, updateSession } from '@/lib/sessionStorage';
 interface AnswerResponse {
   is_correct: boolean;
-  feedback_text: string;
+  feedbackText: string;
   solution: string;
   created_at: string;
   error?: string;
@@ -115,9 +115,9 @@ export const MathProblemProvider = ({ children }: { children: ReactNode }) => {
             for (const p of data.generatedProblems) {
               localSession.problems.push({
                 questionId: p.question_id,
-                problemText: p.problem_text,
-                problemType: p.problem_type,
-                difficultyLevel: p.difficulty_level,
+                problemText: p.problemText,
+                problemType: p.problemType,
+                difficultyLevel: p.difficultyLevel,
                 hint: p.hint,
                 userAnswer: null,
                 isCorrect: null,
@@ -172,7 +172,7 @@ export const MathProblemProvider = ({ children }: { children: ReactNode }) => {
                 userAnswer: userAnswer,
                 isAnswered: true,
                 isCorrect: data.is_correct,
-                feedback: data.feedback_text,
+                feedback: data.feedbackText,
                 solution: data.solution,
                 createdAt: data.created_at,
               };
@@ -192,7 +192,7 @@ export const MathProblemProvider = ({ children }: { children: ReactNode }) => {
                 ...localSession.problems[problemIndex],
                 userAnswer: userAnswer,
                 isCorrect: data.is_correct,
-                feedback: data.feedback_text,
+                feedback: data.feedbackText,
                 solution: data.solution,
                 createdAt: data.created_at,
               };
@@ -224,9 +224,9 @@ export const MathProblemProvider = ({ children }: { children: ReactNode }) => {
     setProblem(
       session.problems.map((p) => ({
         question_id: p.questionId,
-        problem_text: p.problemText,
-        problem_type: p.problemType,
-        difficulty_level: p.difficultyLevel,
+        problemText: p.problemText,
+        problemType: p.problemType,
+        difficultyLevel: p.difficultyLevel,
         hint: p.hint,
         solution: p.solution,
         isAnswered: p.userAnswer ? true : false,

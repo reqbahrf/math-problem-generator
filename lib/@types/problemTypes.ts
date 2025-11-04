@@ -1,17 +1,17 @@
 export interface GeneratedMathProblem {
-  problem_text: string;
-  final_answer: string;
-  problem_type: 'Addition' | 'Subtraction' | 'Multiplication' | 'Division';
-  difficulty_level: 'Easy' | 'Medium' | 'Hard';
-  step_by_step_solution: string;
+  problemText: string;
+  finalAnswer: string;
+  problemType: 'Addition' | 'Subtraction' | 'Multiplication' | 'Division';
+  difficultyLevel: 'Easy' | 'Medium' | 'Hard';
+  stepByStepSolution: string;
   hint: string;
 }
 
 export interface MathProblem {
   question_id: string;
-  problem_text: string;
-  problem_type: GeneratedMathProblem['problem_type'];
-  difficulty_level: GeneratedMathProblem['difficulty_level'];
+  problemText: string;
+  problemType: GeneratedMathProblem['problemType'];
+  difficultyLevel: GeneratedMathProblem['difficultyLevel'];
   hint: string;
 }
 
@@ -27,8 +27,8 @@ export interface MathProblemState extends MathProblem {
 export interface ProblemSession {
   questionId: string;
   problemText: string;
-  problemType: MathProblem['problem_type'];
-  difficultyLevel: MathProblem['difficulty_level'];
+  problemType: MathProblem['problemType'];
+  difficultyLevel: MathProblem['difficultyLevel'];
   hint?: string | null;
   userAnswer?: string | null;
   isCorrect?: boolean | null;

@@ -4,5 +4,5 @@ export interface FeedbackProps {
 }
 
 export interface GeneratedFeedback {
-  feedback_text: string;
+  feedbackText: string;
 }
