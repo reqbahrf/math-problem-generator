@@ -29,12 +29,12 @@ export interface ProblemSession {
   problemText: string;
   problemType: MathProblem['problem_type'];
   difficultyLevel: MathProblem['difficulty_level'];
-  hint: string;
-  userAnswer: string;
-  isCorrect: boolean;
-  feedback: string;
-  solution: string;
-  createdAt: string;
+  hint?: string | null;
+  userAnswer?: string | null;
+  isCorrect?: boolean | null;
+  feedback?: string | null;
+  solution?: string | null;
+  createdAt?: string | null;
 }
 
 export interface ProblemSessionConfigState {
