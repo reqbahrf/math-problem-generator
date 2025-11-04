@@ -192,7 +192,7 @@ const SessionHistoryCard = ({
                     transition={{ delay: i * 0.05 }}
                   >
                     <ViewHistoryCard
-                      id={session.id}
+                      questionId={session.id}
                       {...p}
                     />
                   </motion.div>
