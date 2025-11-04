@@ -3,7 +3,7 @@
 import { memo, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { LocalSession } from '@/lib/sessionStorage';
-import ViewHistoryCard from '@/app/components/stats/ViewHistoryCard';
+import ViewHistoryCard from '@/app/components/stats/ProblemStatCard';
 import { RiDeleteBin2Line, RiPlayCircleLine } from '@remixicon/react';
 import { useModalContext } from '@/app/context/useModalContext';
 import SessionResumeNotice from '@/app/components/modalBody/SessionResumeNotice';
