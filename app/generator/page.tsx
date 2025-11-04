@@ -38,7 +38,10 @@ function GeneratorInner() {
         headerColor: 'bg-red-600 dark:bg-red-400',
         children: (
           <div className='flex flex-col gap-2 text-center'>
-            Current session will end. Are you sure you want to leave this page?
+            Current session will end. Are you sure you want to leave this page?{' '}
+            <br />
+            You can resume this session by going to the{' '}
+            <span className='font-bold'>View Previous Session</span> page.
             <div className='flex justify-center gap-2'>
               <button
                 className='bg-gray-200 dark:bg-gray-700 px-4 py-2 rounded'
