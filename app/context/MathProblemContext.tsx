@@ -37,8 +37,10 @@ interface MathProblemContextType {
     React.SetStateAction<ProblemSessionConfigState>
   >;
   setProblem: React.Dispatch<React.SetStateAction<MathProblemState[] | null>>;
+  setCurrentProblemIndex: React.Dispatch<React.SetStateAction<number>>;
   problemSessionConfig: ProblemSessionConfigState;
   currentProblemId: string;
+  currentProblemIndex: number;
   problem: MathProblemState[] | null;
   score: number;
   isLoading: LoadingState;
@@ -50,6 +52,7 @@ interface MathProblemContextType {
   ) => Promise<void>;
   error: string | null;
   invalidateCurrentSession: () => void;
+  isProblemsCompletelyAnswered: boolean;
 }
 
 const MathProblemContext = createContext<MathProblemContextType | undefined>(
@@ -69,6 +72,7 @@ export const MathProblemProvider = ({ children }: { children: ReactNode }) => {
     });
   const [problem, setProblem] = useState<MathProblemState[] | null>(null);
   const [currentProblemId, setCurrentProblemId] = useState<string>('');
+  const [currentProblemIndex, setCurrentProblemIndex] = useState(0);
   const [isLoading, setIsLoading] = useState<LoadingState>(initialLoading);
 
   const [score, setScore] = useState<number>(0);
@@ -232,14 +236,15 @@ export const MathProblemProvider = ({ children }: { children: ReactNode }) => {
         createdAt: p.createdAt,
       }))
     );
-    setCurrentProblemId(
-      session.problems.find((p) => !p.userAnswer)?.questionId ?? null
-    );
+    setCurrentProblemId(session.problems.find((p) => !p.userAnswer).questionId);
+    setCurrentProblemIndex(session.problems.findIndex((p) => !p.userAnswer));
     setProblemSessionConfig({
       count: session.count,
       gradeLevel: session.gradeLevel,
     });
   }, []);
+
+  const isProblemsCompletelyAnswered = problem?.every((p) => p.isAnswered);
 
   const invalidateCurrentSession = (): void => {
     setProblem(null);
@@ -257,6 +262,8 @@ export const MathProblemProvider = ({ children }: { children: ReactNode }) => {
         currentProblemId,
         problemSessionConfig,
         setProblemSessionConfig,
+        currentProblemIndex,
+        setCurrentProblemIndex,
         score,
         problem,
         setProblem,
@@ -265,6 +272,7 @@ export const MathProblemProvider = ({ children }: { children: ReactNode }) => {
         error,
         invalidateCurrentSession,
         resumeSavedSession,
+        isProblemsCompletelyAnswered,
       }}
     >
       {children}
