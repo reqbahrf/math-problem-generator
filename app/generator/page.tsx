@@ -132,7 +132,7 @@ function GeneratorInner() {
           <BackButton beforeBack={beforeBack} />
         </div>
         <div className='mb-4 flex justify-center w-full'>
-          <StatCard />
+          {problem?.length > 0 && <StatCard />}
         </div>
         {loading ? (
           <div className='text-center py-10 text-gray-600 dark:text-gray-300'>
