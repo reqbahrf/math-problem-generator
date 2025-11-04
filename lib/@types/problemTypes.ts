@@ -24,14 +24,17 @@ export interface MathProblemState extends MathProblem {
   createdAt: string | null;
 }
 
-export interface ProblemHistory {
-  id: string;
+export interface ProblemSession {
+  questionId: string;
   problemText: string;
-  userAnswer: string | null;
-  feedback: string | null;
-  isCorrect: boolean | null;
-  solution: string | null;
-  createdAt: string | null;
+  problemType: MathProblem['problem_type'];
+  difficultyLevel: MathProblem['difficulty_level'];
+  hint: string;
+  userAnswer: string;
+  isCorrect: boolean;
+  feedback: string;
+  solution: string;
+  createdAt: string;
 }
 
 export interface ProblemSessionConfigState {
