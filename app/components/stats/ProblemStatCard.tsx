@@ -2,7 +2,7 @@
 import { ProblemSession } from '@/lib/@types/problemTypes';
 import React, { memo } from 'react';
 
-const ViewHistoryCard: React.FC<ProblemSession> = ({
+const ProblemStatCard: React.FC<ProblemSession> = ({
   questionId,
   problemText,
   userAnswer,
@@ -63,4 +63,4 @@ const ViewHistoryCard: React.FC<ProblemSession> = ({
   );
 };
 
-export default memo(ViewHistoryCard);
+export default memo(ProblemStatCard);
