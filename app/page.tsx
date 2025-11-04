@@ -2,7 +2,6 @@
 
 import { useRouter } from 'next/navigation';
 import { motion } from 'motion/react';
-import { createNewSession } from '@/lib/sessionStorage';
 import DarkModeToggle from './components/DarkModeToggle';
 import useSessions from '@/app/hook/useSessions';
 import ConfigForm from './components/ConfigForm';
