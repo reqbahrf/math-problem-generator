@@ -28,12 +28,18 @@ function GeneratorInner() {
     error,
     invalidateCurrentSession,
     resumeSavedSession,
+    currentProblemIndex,
+    setCurrentProblemIndex,
+    isProblemsCompletelyAnswered,
   } = useMathProblem();
   const { openModal, closeModal } = useModalContext();
-  const [currentProblemIndex, setCurrentProblemIndex] = useState(0);
 
   const beforeBack = async (): Promise<void> => {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
+      if (isProblemsCompletelyAnswered) {
+        resolve(void 0);
+        return;
+      }
       openModal({
         title: 'Confirm',
         headerColor: 'bg-red-600 dark:bg-red-400',
@@ -42,6 +48,7 @@ function GeneratorInner() {
             resolve={resolve}
             invalidateCurrentSession={invalidateCurrentSession}
             closeModal={closeModal}
+            reject={reject}
           />
         ),
         size: 'md',

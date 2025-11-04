@@ -4,10 +4,12 @@ interface EndCurrentSessionNoticeProps {
   resolve: (value: unknown) => void;
   invalidateCurrentSession: () => void;
   closeModal: () => void;
+  reject: (value: unknown) => void;
 }
 
 const EndCurrentSessionNotice: React.FC<EndCurrentSessionNoticeProps> = ({
   resolve,
+  reject,
   invalidateCurrentSession,
   closeModal,
 }) => {
@@ -21,7 +23,7 @@ const EndCurrentSessionNotice: React.FC<EndCurrentSessionNoticeProps> = ({
           className='bg-gray-200 dark:bg-gray-700 px-4 py-2 rounded'
           onClick={() => {
             closeModal();
-            resolve(void 0);
+            reject(void 0);
           }}
         >
           Cancel
