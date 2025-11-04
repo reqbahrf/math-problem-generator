@@ -4,21 +4,11 @@ const DB_NAME = 'math_problem_app';
 const STORAGE_NAME = 'sessions';
 const DB_VERSION = 1;
 
+import type { ProblemSession } from './@types/problemTypes';
 export interface LocalSession {
   id: string;
   createdAt: string;
-  problems: {
-    questionId: string;
-    problemText: string;
-    problemType: string;
-    difficultyLevel: string;
-    hint: string;
-    userAnswer: string;
-    isCorrect: boolean;
-    feedback: string;
-    solution: string;
-    createdAt: string;
-  }[];
+  problems: ProblemSession[];
   gradeLevel: number;
   count: number;
   status: 'Incomplete' | 'Completed';
