@@ -1,8 +1,8 @@
 export interface GeneratedMathProblem {
   problem_text: string;
   final_answer: string;
-  problem_type: string;
-  difficulty_level: string;
+  problem_type: 'Addition' | 'Subtraction' | 'Multiplication' | 'Division';
+  difficulty_level: 'Easy' | 'Medium' | 'Hard';
   step_by_step_solution: string;
   hint: string;
 }
@@ -10,8 +10,8 @@ export interface GeneratedMathProblem {
 export interface MathProblem {
   question_id: string;
   problem_text: string;
-  problem_type: string;
-  difficulty_level: string;
+  problem_type: GeneratedMathProblem['problem_type'];
+  difficulty_level: GeneratedMathProblem['difficulty_level'];
   hint: string;
 }
 
