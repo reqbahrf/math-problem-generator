@@ -4,6 +4,8 @@ import { memo, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { LocalSession } from '@/lib/sessionStorage';
 import ViewHistoryCard from '@/app/components/stats/ProblemStatCard';
+import PieChart from '@/app/components/chart/PieChart';
+import LineChart from '@/app/components/chart/LineChart';
 import { RiDeleteBin2Line, RiPlayCircleLine } from '@remixicon/react';
 import { useModalContext } from '@/app/context/useModalContext';
 import SessionResumeNotice from '@/app/components/modalBody/SessionResumeNotice';
@@ -27,6 +29,34 @@ const SessionHistoryCard = ({
     (p) => p.userAnswer !== null
   ).length;
   const problemCount = session.problems.length;
+
+  const problemTypeCounts = session.problems.reduce((counts, problem) => {
+    if (counts[problem.problemType]) {
+      counts[problem.problemType]++;
+    } else {
+      counts[problem.problemType] = 1;
+    }
+    return counts;
+  }, {} as Record<string, number>);
+
+  const categories = ['Addition', 'Subtraction', 'Multiplication', 'Division'];
+  const problemTypeSeries = categories.map(
+    (type) => problemTypeCounts[type] || 0
+  );
+
+  const difficultyCounts = session.problems.reduce((counts, problem) => {
+    if (counts[problem.difficultyLevel]) {
+      counts[problem.difficultyLevel]++;
+    } else {
+      counts[problem.difficultyLevel] = 1;
+    }
+    return counts;
+  }, {} as Record<string, number>);
+
+  const difficultyCategories = ['Easy', 'Medium', 'Hard'];
+  const difficultySeries = difficultyCategories.map(
+    (type) => difficultyCounts[type] || 0
+  );
 
   const handleResumeSession = async (
     e: React.MouseEvent<HTMLButtonElement>
@@ -179,6 +209,28 @@ const SessionHistoryCard = ({
             className='overflow-hidden'
           >
             <div className='space-y-4 mt-6 border-t border-gray-200 dark:border-gray-600 pt-6'>
+              {/* Charts Section */}
+              <div className='grid grid-cols-1 md:grid-cols-2 gap-6 mb-6'>
+                <div>
+                  <h3 className='text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4'>
+                    Problem Types Distribution
+                  </h3>
+                  <PieChart
+                    series={problemTypeSeries}
+                    labels={categories}
+                  />
+                </div>
+                <div>
+                  <h3 className='text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4'>
+                    Difficulty Level Distribution
+                  </h3>
+                  <LineChart
+                    series={difficultySeries}
+                    categories={difficultyCategories}
+                  />
+                </div>
+              </div>
+
               {session.problems.length === 0 ? (
                 <p className='text-center text-gray-600 dark:text-gray-400 italic'>
                   No problems recorded for this session.
