@@ -60,8 +60,8 @@ export default function IndexPage() {
           className='text-lg sm:text-xl leading-relaxed mb-10 text-gray-700 dark:text-gray-300'
         >
           Sharpen your arithmetic, fractions, and geometry skills with
-          AI-powered math problems designed for Primary 5 learners. Each problem
-          comes with hints, step-by-step explanations, and personalized
+          AI-powered math problems designed for Grade 1 to 12 learners. Each
+          problem comes with hints, step-by-step explanations, and personalized
           feedback.
         </motion.p>
 
