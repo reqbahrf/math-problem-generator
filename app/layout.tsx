@@ -7,11 +7,7 @@ const inter = Inter({ subsets: ['latin'] });
 import { ModalProvider } from './context/useModalContext';
 
 export const metadata: Metadata = {
-  metadataBase: new URL(
-    process.env.NEXT_DEBUG
-      ? 'http://localhost:3000'
-      : process.env.NEXT_PUBLIC_APP_URL
-  ),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL),
   title: 'Math Problem Generator',
   description:
     'AI-powered math problem generator for Grade 1 to 12 students. Utilize Gemini AI to generate math problems.',
