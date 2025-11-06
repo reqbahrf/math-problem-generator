@@ -31,10 +31,8 @@ const SessionHistoryCard = ({
   const problemCount = session.problems.length;
 
   const problemTypeCounts = session.problems.reduce((counts, problem) => {
-    if (counts[problem.problemType]) {
-      counts[problem.problemType]++;
-    } else {
-      counts[problem.problemType] = 1;
+    if (problem.problemType) {
+      counts[problem.problemType] = counts[problem.problemType] + 1 || 1;
     }
     return counts;
   }, {} as Record<string, number>);
@@ -45,10 +43,9 @@ const SessionHistoryCard = ({
   );
 
   const difficultyCounts = session.problems.reduce((counts, problem) => {
-    if (counts[problem.difficultyLevel]) {
-      counts[problem.difficultyLevel]++;
-    } else {
-      counts[problem.difficultyLevel] = 1;
+    if (problem.difficultyLevel) {
+      counts[problem.difficultyLevel] =
+        counts[problem.difficultyLevel] + 1 || 1;
     }
     return counts;
   }, {} as Record<string, number>);
