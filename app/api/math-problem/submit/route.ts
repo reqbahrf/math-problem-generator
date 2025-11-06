@@ -54,10 +54,10 @@ export async function POST(req: Request) {
     if (!feedback.feedbackText)
       throw new Error(ERROR_MESSAGES.INVALID_AI_RESPONSE);
     return NextResponse.json({
-      is_correct: isCorrect,
-      feedback_text: feedback.feedbackText,
+      isCorrect: isCorrect,
+      feedbackText: feedback.feedbackText,
       solution: session.step_by_step_solution,
-      created_at: formatDate(session.created_at),
+      createdAt: formatDate(session.created_at),
     });
   } catch (error) {
     console.log('Error on answer submission', error);
