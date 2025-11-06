@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS math_problem_sessions (
     problem_type problem_type_enum NOT NULL,
     difficulty_level difficulty_level_enum NOT NULL,
     correct_answer NUMERIC NOT NULL,
+    is_answered BOOLEAN DEFAULT 0,
     step_by_step_solution TEXT NOT NULL,
     hint TEXT NOT NULL
 );

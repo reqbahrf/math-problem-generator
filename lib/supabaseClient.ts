@@ -24,6 +24,7 @@ export type Database = {
           difficulty_level: 'Easy' | 'Medium' | 'Hard';
           step_by_step_solution: string;
           correct_answer: number;
+          is_answered: boolean;
         };
         Insert: {
           id?: string;
@@ -37,6 +38,7 @@ export type Database = {
           difficulty_level: 'Easy' | 'Medium' | 'Hard';
           step_by_step_solution: string;
           correct_answer: number;
+          is_answered: boolean;
         };
         Update: {
           id?: string;
@@ -50,6 +52,7 @@ export type Database = {
           difficulty_level?: 'Easy' | 'Medium' | 'Hard';
           step_by_step_solution?: string;
           correct_answer?: number;
+          is_answered?: boolean;
         };
       };
       math_problem_submissions: {
