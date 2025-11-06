@@ -1,40 +1,53 @@
 'use client';
-import { ProblemHistory } from '@/app/types/problemTypes';
+import { ProblemSession } from '@/lib/@types/problemTypes';
 import React, { memo } from 'react';
 
-const ViewHistoryCard = ({
-  id,
-  problem_text,
-  user_answer,
-  is_correct,
+const ProblemStatCard: React.FC<ProblemSession> = ({
+  questionId,
+  problemText,
+  userAnswer,
+  isCorrect,
+  problemType,
   solution,
-  created_at,
-}: ProblemHistory) => {
+  createdAt,
+}) => {
   return (
     <div className='bg-white dark:bg-gray-900 rounded-lg shadow-md p-6 grid grid-cols-[2fr_2fr] gap-4'>
       <div className='md:col-span-1 col-span-2'>
         <h2 className='text-xl text-gray-700 dark:text-gray-300 font-bold mb-2 border-b pb-1'>
-          Problem ID: {id.slice(0, 8)}...
+          Problem ID: {questionId.slice(0, 8)}...
         </h2>
-        <p className='text-gray-700 dark:text-gray-300 mb-2'>{problem_text}</p>
+        <p className='text-gray-700 dark:text-gray-300 mb-2'>{problemText}</p>
       </div>
 
       <div className='md:col-span-1 col-span-2'>
         <p className='text-gray-700 dark:text-gray-300 mb-2'>
-          Your Answer: <span className='font-semibold'>{user_answer}</span>
+          Your Answer:{' '}
+          <span className='font-semibold'>{userAnswer || 'not answered'}</span>
         </p>
         <p className='text-gray-700 dark:text-gray-300 mb-2'>
           Status:{' '}
           <span
             className={`text-white px-2 py-1 rounded-2xl ${
-              is_correct ? 'bg-green-600' : 'bg-red-600'
+              isCorrect === null
+                ? 'bg-gray-600'
+                : isCorrect
+                ? 'bg-green-600'
+                : 'bg-red-600'
             }`}
           >
-            {is_correct ? 'Correct' : 'Incorrect'}
+            {isCorrect === null
+              ? 'unanswered'
+              : isCorrect
+              ? 'Correct'
+              : 'Incorrect'}
           </span>
         </p>
         <p className='text-gray-700 dark:text-gray-300 mb-2'>
-          Created: {created_at}
+          Type: {problemType}
+        </p>
+        <p className='text-gray-700 dark:text-gray-300 mb-2'>
+          Created: {createdAt}
         </p>
       </div>
       <hr className='col-span-2' />
@@ -43,11 +56,11 @@ const ViewHistoryCard = ({
         <h3 className='text-lg font-bold mb-2'>Solution:</h3>
         <p
           className=' text-gray-700 text-sm dark:text-gray-300'
-          dangerouslySetInnerHTML={{ __html: solution }}
+          dangerouslySetInnerHTML={{ __html: solution || 'not available' }}
         />
       </div>
     </div>
   );
 };
 
-export default memo(ViewHistoryCard);
+export default memo(ProblemStatCard);

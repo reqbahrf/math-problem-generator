@@ -1,10 +1,20 @@
 'use client';
 
 import DarkModeToggle from '@/app/components/DarkModeToggle';
-import SessionHistoryCard from '@/app/components/SessionHistoryCard';
 import useSessions from '@/app/hook/useSessions';
 import BackButton from '@/app/components/BackButton';
 import useDeleteSession from '@/app/hook/useDeleteSession';
+import dynamic from 'next/dynamic';
+
+const SessionHistoryCard = dynamic(
+  () => import('@/app/components/SessionHistoryCard'),
+  {
+    ssr: false,
+    loading: () => (
+      <div className='animate-pulse bg-gray-200 dark:bg-gray-700 h-64 rounded-2xl'></div>
+    ),
+  }
+);
 
 export default function HistoryPage() {
   const { sessions, isGetSessionLoading, setSessions } = useSessions();

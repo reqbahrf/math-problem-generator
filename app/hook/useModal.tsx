@@ -13,6 +13,9 @@ const useModal = (): UseModalReturn => {
   const [isOpen, setIsOpen] = useState(false);
   const [modalContent, setModalContent] = useState<ReactElement | null>(null);
   const [modalTitle, setModalTitle] = useState('');
+  const [triggerRef, setTriggerRef] = useState<
+    React.RefObject<HTMLButtonElement> | undefined
+  >(undefined);
   const [modalHeaderColor, setModalHeaderColor] = useState('');
   const [size, setSize] = useState<
     'sm' | 'md' | 'md-f-h' | 'full' | 'responsive'
@@ -22,11 +25,19 @@ const useModal = (): UseModalReturn => {
   >(undefined);
 
   const openModal = useCallback(
-    ({ children, size, title, headerColor, onClose }: OpenModalProps) => {
+    ({
+      children,
+      size,
+      title,
+      headerColor,
+      onClose,
+      triggerRef,
+    }: OpenModalProps) => {
       setSize(size);
       setModalContent(children);
       setModalTitle(title);
       setModalHeaderColor(headerColor || 'bg-white dark:bg-gray-950');
+      setTriggerRef(triggerRef);
       setOnCloseCallback(() => {
         return () => {
           setIsOpen(false);
@@ -43,6 +54,7 @@ const useModal = (): UseModalReturn => {
   const closeModal = useCallback(() => {
     setIsOpen(false);
     setModalContent(null);
+    setTriggerRef(undefined);
     setModalTitle('');
     setModalHeaderColor('');
     setOnCloseCallback(undefined);
@@ -50,12 +62,14 @@ const useModal = (): UseModalReturn => {
 
   const modal = isOpen ? (
     <Modal
-      children={modalContent!}
       size={size}
       title={modalTitle}
       headerColor={modalHeaderColor}
       onClose={onCloseCallback || closeModal}
-    />
+      triggerRef={triggerRef}
+    >
+      {modalContent!}
+    </Modal>
   ) : null;
 
   return { modal, openModal, closeModal };

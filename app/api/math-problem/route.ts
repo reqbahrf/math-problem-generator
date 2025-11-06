@@ -4,47 +4,49 @@ import { supabase } from '@/lib/supabaseClient';
 import PROMPT_OBJ from '@/lib/prompts/mathPrompts';
 import { ERROR_MESSAGES } from '@/lib/constants/errorMessages';
 import getModelOutput from '@/lib/Genai/googleAI';
+import mockProblems from '@/lib/constants/sampleProblemRes';
 
-export async function GET() {
+export async function POST(req: Request) {
   try {
-    const json = await getModelOutput(
-      PROMPT_OBJ.MATH_PROBLEMS_PRIMARY_5_PROMPT
-    );
+    const { count, gradeLevel } = await req.json();
+    const prompt = PROMPT_OBJ.generateMathProblemPrompt(gradeLevel, count);
+    // const result = await getModelOutput(prompt);
+    const result = mockProblems;
+    const problems = Array.isArray(result) ? result : [result];
+    console.log('problems', problems);
     if (
-      !json ||
-      !json.problem_text ||
-      !json.final_answer ||
-      !json.problem_type ||
-      !json.difficulty_level ||
-      !json.step_by_step_solution ||
-      !json.hint
+      (!Array.isArray(problems) || problems.length === 0) &&
+      problems.length !== count
     ) {
       throw new Error(ERROR_MESSAGES.INVALID_AI_RESPONSE);
     }
 
     const { data, error } = await supabase
       .from('math_problem_sessions')
-      .insert([
-        {
-          problem_text: json.problem_text,
-          correct_answer: json.final_answer,
-          problem_type: json.problem_type,
-          difficulty_level: json.difficulty_level,
-          step_by_step_solution: json.step_by_step_solution,
-          hint: json.hint,
-        },
-      ])
-      .select('id')
-      .single();
+      .insert(
+        problems.map((p) => ({
+          problem_text: p.problemText,
+          correct_answer: p.finalAnswer,
+          problem_type: p.problemType,
+          difficulty_level: p.difficultyLevel,
+          step_by_step_solution: p.stepByStepSolution,
+          hint: p.hint,
+        }))
+      )
+      .select('id, problem_text, problem_type, difficulty_level, hint');
 
     if (error) throw error;
 
+    const generatedProblems = data.map((p) => ({
+      question_id: p.id,
+      problemText: p.problem_text,
+      problemType: p.problem_type,
+      difficultyLevel: p.difficulty_level,
+      hint: p.hint,
+    }));
+
     return NextResponse.json({
-      session_id: data.id,
-      problem_text: json.problem_text,
-      problem_type: json.problem_type,
-      difficulty_level: json.difficulty_level,
-      hint: json.hint,
+      generatedProblems,
     });
   } catch (error) {
     console.log('Generate problem failed', error);

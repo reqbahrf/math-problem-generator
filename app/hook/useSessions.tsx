@@ -1,7 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { LocalSession } from '@/lib/sessionStorage';
+import {
+  checkOneYearOldSessions,
+  deleteOneYearOldSessions,
+  LocalSession,
+} from '@/lib/sessionStorage';
 import { getAllSessions } from '@/lib/sessionStorage';
 
 const useSessions = () => {
@@ -11,6 +15,11 @@ const useSessions = () => {
 
   useEffect(() => {
     setIsGetSessionLoading(true);
+    checkOneYearOldSessions().then((hasOneYearOldSessions) => {
+      if (hasOneYearOldSessions) {
+        deleteOneYearOldSessions();
+      }
+    });
     getAllSessions()
       .then(setSessions)
       .finally(() => setIsGetSessionLoading(false));

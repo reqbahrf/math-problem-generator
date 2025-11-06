@@ -1,10 +1,10 @@
 export const buildFeedbackPrompt = (
   basePrompt: string,
   problem: {
-    problem_text: string;
+    problemText: string;
     user_answer: string;
     correct_answer: string;
-    step_by_step_solution: string;
+    stepByStepSolution: string;
   }
 ) => {
   return `
@@ -12,9 +12,9 @@ export const buildFeedbackPrompt = (
 
   Here is the problem data to base your feedback on:
 {
-    Problem: ${problem.problem_text}
+    Problem: ${problem.problemText}
     User's Answer: ${problem.user_answer}
     Correct Answer: ${problem.correct_answer}
-    Step-by-Step Solution: ${problem.step_by_step_solution}
+    Step-by-Step Solution: ${problem.stepByStepSolution}
 }`;
 };

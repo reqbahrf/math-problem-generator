@@ -1,10 +1,14 @@
 'use client';
 
-import { memo, useState } from 'react';
+import { memo, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { LocalSession } from '@/lib/sessionStorage';
-import ViewHistoryCard from '@/app/components/stats/ViewHistoryCard';
-import { RiDeleteBin2Line } from '@remixicon/react';
+import ViewHistoryCard from '@/app/components/stats/ProblemStatCard';
+import PieChart from '@/app/components/chart/PieChart';
+import LineChart from '@/app/components/chart/LineChart';
+import { RiDeleteBin2Line, RiPlayCircleLine } from '@remixicon/react';
+import { useModalContext } from '@/app/context/useModalContext';
+import SessionResumeNotice from '@/app/components/modalBody/SessionResumeNotice';
 
 interface SessionHistoryCardProps {
   session: LocalSession;
@@ -16,8 +20,60 @@ const SessionHistoryCard = ({
   dlSession,
 }: SessionHistoryCardProps) => {
   const [isOpen, setIsOpen] = useState(false);
+  const { openModal, closeModal } = useModalContext();
 
   const toggleDropdown = () => setIsOpen(!isOpen);
+
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const numberOfAnsweredQuestions = session.problems.filter(
+    (p) => p.userAnswer !== null
+  ).length;
+  const problemCount = session.problems.length;
+
+  const problemTypeCounts = session.problems.reduce((counts, problem) => {
+    if (problem.problemType) {
+      counts[problem.problemType] = counts[problem.problemType] + 1 || 1;
+    }
+    return counts;
+  }, {} as Record<string, number>);
+
+  const categories = ['Addition', 'Subtraction', 'Multiplication', 'Division'];
+  const problemTypeSeries = categories.map(
+    (type) => problemTypeCounts[type] || 0
+  );
+
+  const difficultyCounts = session.problems.reduce((counts, problem) => {
+    if (problem.difficultyLevel) {
+      counts[problem.difficultyLevel] =
+        counts[problem.difficultyLevel] + 1 || 1;
+    }
+    return counts;
+  }, {} as Record<string, number>);
+
+  const difficultyCategories = ['Easy', 'Medium', 'Hard'];
+  const difficultySeries = difficultyCategories.map(
+    (type) => difficultyCounts[type] || 0
+  );
+
+  const handleResumeSession = async (
+    e: React.MouseEvent<HTMLButtonElement>
+  ) => {
+    e.stopPropagation();
+    const id = e.currentTarget.dataset.sessionId;
+    if (!id) return;
+    openModal({
+      title: 'Confirm',
+      headerColor: 'bg-red-600 dark:bg-red-400',
+      children: (
+        <SessionResumeNotice
+          sessionId={id}
+          closeModal={closeModal}
+        />
+      ),
+      size: 'md',
+      triggerRef,
+    });
+  };
 
   return (
     <motion.div
@@ -30,7 +86,7 @@ const SessionHistoryCard = ({
         className='flex justify-between items-center mb-4 cursor-pointer select-none '
         onClick={toggleDropdown}
       >
-        <div>
+        <div className='w-full'>
           <h1 className='text-2xl font-semibold text-gray-800 dark:text-gray-100 flex items-center gap-2'>
             🧮 Session{' '}
             <span className='text-blue-600 dark:text-blue-400 truncate max-w-[150px] sm:max-w-[250px]'>
@@ -57,6 +113,39 @@ const SessionHistoryCard = ({
               {session.score} / {session.problems.length}
             </span>
           </h3>
+          <div className='flex gap-4 ps-4 text-md font-medium text-gray-700 dark:text-gray-300'>
+            <div>
+              Problem Level:{' '}
+              <span className='text-gray-500 dark:text-gray-400'>
+                Grade {session.gradeLevel}
+              </span>
+            </div>
+            <div>
+              Status:{' '}
+              <span
+                className={`text-blue-600 dark:text-blue-400 ${
+                  session.status === 'Completed'
+                    ? 'text-green-600 dark:text-green-400'
+                    : 'text-red-600 dark:text-red-400'
+                }`}
+              >
+                {session.status}
+              </span>
+            </div>
+          </div>
+          <div className='mt-2 text-md font-medium text-gray-700 dark:text-gray-300'>
+            Progress: {numberOfAnsweredQuestions} / {problemCount} (
+            {((numberOfAnsweredQuestions / problemCount) * 100).toFixed(2)}
+            %)
+            <div className='w-full h-1 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden'>
+              <div
+                className='h-full bg-blue-600 dark:bg-blue-400'
+                style={{
+                  width: `${(numberOfAnsweredQuestions / problemCount) * 100}%`,
+                }}
+              />
+            </div>
+          </div>
         </div>
         <motion.button
           onClick={toggleDropdown}
@@ -81,6 +170,18 @@ const SessionHistoryCard = ({
           </svg>
         </motion.button>
         <div className='absolute top-[-10px] right-[-10px]'>
+          {session.status === 'Incomplete' && (
+            <motion.button
+              ref={triggerRef}
+              data-session-id={session.id}
+              onClick={handleResumeSession}
+              className='text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-600'
+              whileHover={{ scale: 1.1 }}
+              transition={{ duration: 0.3 }}
+            >
+              <RiPlayCircleLine size={32} />
+            </motion.button>
+          )}
           <motion.button
             data-session-id={session.id}
             onClick={dlSession}
@@ -88,7 +189,7 @@ const SessionHistoryCard = ({
             whileHover={{ scale: 1.1 }}
             transition={{ duration: 0.3 }}
           >
-            <RiDeleteBin2Line />
+            <RiDeleteBin2Line size={32} />
           </motion.button>
         </div>
       </div>
@@ -105,6 +206,28 @@ const SessionHistoryCard = ({
             className='overflow-hidden'
           >
             <div className='space-y-4 mt-6 border-t border-gray-200 dark:border-gray-600 pt-6'>
+              {/* Charts Section */}
+              <div className='grid grid-cols-1 md:grid-cols-2 gap-6 mb-6'>
+                <div>
+                  <h3 className='text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4'>
+                    Problem Types Distribution
+                  </h3>
+                  <PieChart
+                    series={problemTypeSeries}
+                    labels={categories}
+                  />
+                </div>
+                <div>
+                  <h3 className='text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4'>
+                    Difficulty Level Distribution
+                  </h3>
+                  <LineChart
+                    series={difficultySeries}
+                    categories={difficultyCategories}
+                  />
+                </div>
+              </div>
+
               {session.problems.length === 0 ? (
                 <p className='text-center text-gray-600 dark:text-gray-400 italic'>
                   No problems recorded for this session.
@@ -118,7 +241,7 @@ const SessionHistoryCard = ({
                     transition={{ delay: i * 0.05 }}
                   >
                     <ViewHistoryCard
-                      id={session.id}
+                      questionId={session.id}
                       {...p}
                     />
                   </motion.div>

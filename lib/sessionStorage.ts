@@ -1,20 +1,18 @@
 import { v4 as uuidv4 } from 'uuid';
+import { oneYearAgo } from './dateUtil';
 
 const DB_NAME = 'math_problem_app';
 const STORAGE_NAME = 'sessions';
 const DB_VERSION = 1;
 
+import type { ProblemSession } from './@types/problemTypes';
 export interface LocalSession {
   id: string;
   createdAt: string;
-  problems: {
-    problem_text: string;
-    user_answer: string;
-    is_correct: boolean;
-    feedback: string;
-    solution: string;
-    created_at: string;
-  }[];
+  problems: ProblemSession[];
+  gradeLevel: number;
+  count: number;
+  status: 'Incomplete' | 'Completed';
   score: number;
 }
 
@@ -43,6 +41,9 @@ export async function createNewSession(): Promise<string> {
     id,
     createdAt: new Date().toISOString(),
     problems: [],
+    gradeLevel: 0,
+    count: 0,
+    status: 'Incomplete',
     score: 0,
   };
   store.put(newSession);
@@ -85,4 +86,42 @@ export async function deleteAllSessions(): Promise<void> {
   const db = await initDB();
   const tx = db.transaction(STORAGE_NAME, 'readwrite');
   tx.objectStore(STORAGE_NAME).clear();
+}
+
+export async function checkOneYearOldSessions(): Promise<boolean> {
+  const db = await initDB();
+  const tx = db.transaction(STORAGE_NAME, 'readonly');
+  const store = tx.objectStore(STORAGE_NAME);
+  const request = store.getAll();
+
+  return new Promise((resolve) => {
+    request.onsuccess = () => {
+      const sessions = request.result;
+      const oneYearOldSessions = sessions.filter(
+        (session) => new Date(session.createdAt) < oneYearAgo
+      );
+      resolve(oneYearOldSessions.length > 0);
+    };
+    tx.onerror = () => resolve(false);
+  });
+}
+
+export async function deleteOneYearOldSessions(): Promise<void> {
+  const db = await initDB();
+  const tx = db.transaction(STORAGE_NAME, 'readwrite');
+  const store = tx.objectStore(STORAGE_NAME);
+
+  return new Promise((resolve, reject) => {
+    const request = store.getAll();
+    request.onsuccess = () => {
+      const sessions = request.result;
+      const oneYearOldSessions = sessions.filter(
+        (session) => new Date(session.createdAt) < oneYearAgo
+      );
+      oneYearOldSessions.forEach((session) => store.delete(session.id));
+    };
+
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
 }

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '../../../lib/supabaseClient';
+import { supabase } from '@/lib/supabaseClient';
 import { Receiver } from '@upstash/qstash';
+import { sevenDaysAgo, oneYearAgo } from '@/lib/dateUtil';
 
 export async function POST(request: Request) {
   try {
@@ -35,17 +36,20 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Invalid signature' }, { status: 403 });
     }
 
-    console.log('QStash signature verification successful');
+    const { data: sevenDaysOutdatedSessions, error: fetchError } =
+      await supabase
+        .from('math_problem_sessions')
+        .select('id')
+        .is('is_answered', true)
+        .lt('created_at', sevenDaysAgo.toISOString());
 
-    const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    const { data: oneYearOldSessions, error: fetchOneYearError } =
+      await supabase
+        .from('math_problem_sessions')
+        .select('id')
+        .lt('created_at', oneYearAgo.toISOString());
 
-    const { data: outdatedSessions, error: fetchError } = await supabase
-      .from('math_problem_sessions')
-      .select('id')
-      .lt('created_at', sevenDaysAgo.toISOString());
-
-    if (fetchError) {
+    if (fetchError || fetchOneYearError) {
       console.error('Error fetching outdated sessions:', fetchError);
       return NextResponse.json(
         { error: 'Failed to fetch outdated sessions' },
@@ -53,7 +57,10 @@ export async function POST(request: Request) {
       );
     }
 
-    const sessionIdsToDelete = outdatedSessions.map((session) => session.id);
+    const sessionIdsToDelete = [
+      ...sevenDaysOutdatedSessions.map((session) => session.id),
+      ...oneYearOldSessions.map((session) => session.id),
+    ];
 
     if (sessionIdsToDelete.length > 0) {
       const { error: submissionsError } = await supabase
@@ -68,20 +75,6 @@ export async function POST(request: Request) {
           { status: 500 }
         );
       }
-    }
-
-    // Then delete records from math_problem_sessions
-    const { error: sessionsError } = await supabase
-      .from('math_problem_sessions')
-      .delete()
-      .lt('created_at', sevenDaysAgo.toISOString());
-
-    if (sessionsError) {
-      console.error('Error deleting outdated sessions:', sessionsError);
-      return NextResponse.json(
-        { error: 'Failed to delete outdated sessions' },
-        { status: 500 }
-      );
     }
 
     return NextResponse.json(

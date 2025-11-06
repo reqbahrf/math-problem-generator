@@ -1,8 +1,12 @@
 import { deleteSession, deleteAllSessions } from '@/lib/sessionStorage';
 import { useModalContext } from '../context/useModalContext';
 import { useCallback } from 'react';
+import DeleteSessionNotice from '../components/modalBody/DeleteSessionNotice';
+import DeleteAllSessionNotice from '../components/modalBody/DeleteAllSessionNotice';
 
-const useDeleteSession = (setSessions: React.Dispatch<React.SetStateAction<any[]>>) => {
+const useDeleteSession = (
+  setSessions: React.Dispatch<React.SetStateAction<any[]>>
+) => {
   const { openModal, closeModal } = useModalContext();
 
   const dlSession = useCallback(
@@ -15,36 +19,17 @@ const useDeleteSession = (setSessions: React.Dispatch<React.SetStateAction<any[]
         title: 'Delete Session',
         headerColor: 'bg-red-600 dark:bg-red-400',
         children: (
-          <div className='flex flex-col gap-2 text-center'>
-            You are about to delete session{' '}
-            <span className='font-semibold text-sm'>{id}</span>
-            <br />
-            Are you sure?
-            <div className='flex justify-center gap-2'>
-              <button
-                className='bg-gray-200 dark:bg-gray-700 px-4 py-2 rounded'
-                onClick={() => closeModal()}
-              >
-                Cancel
-              </button>
-              <button
-                className='bg-red-600 dark:bg-red-400 px-4 py-2 rounded'
-                onClick={() =>
-                  deleteSession(id).then(() => {
-                    setSessions((prev) => prev.filter((s) => s.id !== id));
-                    closeModal();
-                  })
-                }
-              >
-                Confirm
-              </button>
-            </div>
-          </div>
+          <DeleteSessionNotice
+            id={id}
+            closeModal={closeModal}
+            deleteSession={deleteSession}
+            setSessions={setSessions}
+          />
         ),
         size: 'md',
       });
     },
-    []
+    [openModal, closeModal, setSessions]
   );
 
   const dlAllSessions = useCallback(async () => {
@@ -52,34 +37,15 @@ const useDeleteSession = (setSessions: React.Dispatch<React.SetStateAction<any[]
       title: 'Delete All Sessions',
       headerColor: 'bg-red-600 dark:bg-red-400',
       children: (
-        <div className='flex flex-col gap-2 text-center'>
-          You are about to delete all sessions
-          <br />
-          Are you sure?
-          <div className='flex justify-center gap-2'>
-            <button
-              className='bg-gray-200 dark:bg-gray-700 px-4 py-2 rounded'
-              onClick={() => closeModal()}
-            >
-              Cancel
-            </button>
-            <button
-              className='bg-red-600 dark:bg-red-400 px-4 py-2 rounded'
-              onClick={() =>
-                deleteAllSessions().then(() => {
-                  setSessions([]);
-                  closeModal();
-                })
-              }
-            >
-              Confirm
-            </button>
-          </div>
-        </div>
+        <DeleteAllSessionNotice
+          closeModal={closeModal}
+          deleteAllSessions={deleteAllSessions}
+          setSessions={setSessions}
+        />
       ),
       size: 'md',
     });
-  }, []);
+  }, [openModal, closeModal, setSessions]);
 
   return { dlSession, dlAllSessions };
 };
