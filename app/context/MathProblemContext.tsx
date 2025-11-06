@@ -1,16 +1,27 @@
 'use client';
-import React, { createContext, ReactNode, useContext, useState } from 'react';
-import { MathProblem, ProblemHistory } from '../types/problemTypes';
+import React, {
+  createContext,
+  ReactNode,
+  useCallback,
+  useContext,
+  useState,
+} from 'react';
+import {
+  MathProblem,
+  MathProblemState,
+  ProblemSessionConfigState,
+} from '../../lib/@types/problemTypes';
+import { getSession, LocalSession, updateSession } from '@/lib/sessionStorage';
 interface AnswerResponse {
   is_correct: boolean;
-  feedback_text: string;
+  feedbackText: string;
   solution: string;
   created_at: string;
   error?: string;
 }
 
-interface MathProblemResponse extends MathProblem {
-  session_id: string;
+interface MathProblemResponse {
+  generatedProblems: MathProblem[];
   error?: string;
 }
 
@@ -20,19 +31,28 @@ interface LoadingState {
 }
 
 interface MathProblemContextType {
-  problem: MathProblem | null;
-  feedback: string;
-  userAnswer: string;
+  generateProblemBatch: (count: number, gradeLevel: number) => Promise<void>;
+  setCurrentProblemId: React.Dispatch<React.SetStateAction<string>>;
+  setProblemSessionConfig: React.Dispatch<
+    React.SetStateAction<ProblemSessionConfigState>
+  >;
+  setProblem: React.Dispatch<React.SetStateAction<MathProblemState[] | null>>;
+  setCurrentProblemIndex: React.Dispatch<React.SetStateAction<number>>;
+  problemSessionConfig: ProblemSessionConfigState;
+  currentProblemId: string;
+  currentProblemIndex: number;
+  problem: MathProblemState[] | null;
   score: number;
-  problemHistory: ProblemHistory[];
-  showHistory: boolean;
-  setShowHistory: (show: boolean) => void;
-  setUserAnswer: (answer: string) => void;
-  isCorrect: boolean | null;
   isLoading: LoadingState;
-  generateProblem: () => Promise<void>;
-  submitAnswer: (answer: string) => Promise<void>;
+  resumeSavedSession: (session: LocalSession) => void;
+  submitAnswer: (
+    answer: string,
+    question_id: string,
+    gradeLevel: number
+  ) => Promise<void>;
   error: string | null;
+  invalidateCurrentSession: () => void;
+  isProblemsCompletelyAnswered: boolean;
 }
 
 const MathProblemContext = createContext<MathProblemContextType | undefined>(
@@ -45,108 +65,214 @@ const initialLoading: LoadingState = {
 };
 
 export const MathProblemProvider = ({ children }: { children: ReactNode }) => {
-  const [problem, setProblem] = useState<MathProblem | null>(null);
-  const [userAnswer, setUserAnswer] = useState('');
-  const [sessionId, setSessionId] = useState<string | null>(null);
-  const [feedback, setFeedback] = useState<string>('');
-  const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
+  const [problemSessionConfig, setProblemSessionConfig] =
+    useState<ProblemSessionConfigState>({
+      count: 0,
+      gradeLevel: 0,
+    });
+  const [problem, setProblem] = useState<MathProblemState[] | null>(null);
+  const [currentProblemId, setCurrentProblemId] = useState<string>('');
+  const [currentProblemIndex, setCurrentProblemIndex] = useState(0);
   const [isLoading, setIsLoading] = useState<LoadingState>(initialLoading);
 
   const [score, setScore] = useState<number>(0);
-  const [problemHistory, setProblemHistory] = useState<ProblemHistory[]>([]);
-  const [showHistory, setShowHistory] = useState<boolean>(false);
 
   const [error, setError] = useState<string | null>(null);
 
-  const generateProblem = async () => {
-    setProblem(null);
-    setUserAnswer('');
-    setIsLoading({ type: 'generate', isLoading: true });
-    setFeedback('');
-    setIsCorrect(null);
-    setError(null);
-    try {
-      const res = await fetch('/api/math-problem');
-      const data = (await res.json()) as MathProblemResponse;
-      if (!res.ok) {
-        throw new Error(data.error || 'Failed to generate problem');
+  const generateProblemBatch = useCallback(
+    async (count: number, grade: number) => {
+      setProblem(null);
+      setIsLoading({ type: 'generate', isLoading: true });
+      setError(null);
+      try {
+        const res = await fetch('/api/math-problem', {
+          method: 'POST',
+          body: JSON.stringify({
+            count,
+            gradeLevel: grade,
+          }),
+        });
+        const data = (await res.json()) as MathProblemResponse;
+        if (!res.ok) {
+          throw new Error(data.error || 'Failed to generate problem batch');
+        }
+        setProblem(
+          data.generatedProblems.map((p) => ({
+            ...p,
+            isAnswered: false,
+            userAnswer: null,
+            isCorrect: null,
+            feedback: null,
+            solution: null,
+            createdAt: null,
+          }))
+        );
+        setCurrentProblemId(data.generatedProblems[0].question_id);
+        const currentSessionId = sessionStorage.getItem('activeSession');
+        if (currentSessionId) {
+          const localSession = await getSession(currentSessionId);
+          if (localSession) {
+            for (const p of data.generatedProblems) {
+              localSession.problems.push({
+                questionId: p.question_id,
+                problemText: p.problemText,
+                problemType: p.problemType,
+                difficultyLevel: p.difficultyLevel,
+                hint: p.hint,
+                userAnswer: null,
+                isCorrect: null,
+                feedback: null,
+                solution: null,
+                createdAt: null,
+              });
+            }
+            localSession.count = count;
+            localSession.gradeLevel = grade;
+            await updateSession(localSession);
+          }
+        }
+      } catch (error) {
+        setError(
+          error instanceof Error
+            ? error.message
+            : 'Failed to generate problem batch'
+        );
+        console.error('Error generating math problem batch:', error);
+      } finally {
+        setIsLoading(initialLoading);
       }
-      setSessionId(data.session_id);
-      setProblem({
-        problem_text: data.problem_text,
-        problem_type: data.problem_type,
-        difficulty_level: data.difficulty_level,
-        hint: data.hint,
-      });
-    } catch (error) {
-      setError(
-        error instanceof Error ? error.message : 'Failed to generate problem'
-      );
-      console.error('Error generating math problem:', error);
-    } finally {
-      setIsLoading(initialLoading);
-    }
-  };
+    },
+    []
+  );
 
-  const submitAnswer = async (userAnswer: string) => {
-    setIsLoading({ type: 'submit-answer', isLoading: true });
-    setFeedback('');
-    setIsCorrect(null);
-    try {
-      const res = await fetch('/api/math-problem/submit', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          session_id: sessionId,
-          user_answer: userAnswer,
-        }),
-      });
-      const data = (await res.json()) as AnswerResponse;
-      if (!res.ok) {
-        throw new Error(data.error || 'Failed to submit answer');
+  const submitAnswer = useCallback(
+    async (userAnswer: string, question_id: string, gradeLevel: number) => {
+      setIsLoading({ type: 'submit-answer', isLoading: true });
+      try {
+        const res = await fetch('/api/math-problem/submit', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            question_id: question_id,
+            user_answer: userAnswer,
+            gradeLevel: gradeLevel,
+          }),
+        });
+        const data = (await res.json()) as AnswerResponse;
+        if (!res.ok) {
+          throw new Error(data.error || 'Failed to submit answer');
+        }
+        setProblem((prev) =>
+          prev.map((p) => {
+            if (p.question_id === question_id) {
+              return {
+                ...p,
+                userAnswer: userAnswer,
+                isAnswered: true,
+                isCorrect: data.is_correct,
+                feedback: data.feedbackText,
+                solution: data.solution,
+                createdAt: data.created_at,
+              };
+            }
+            return p;
+          })
+        );
+        const currentSessionId = sessionStorage.getItem('activeSession');
+        if (currentSessionId) {
+          const localSession = await getSession(currentSessionId);
+          if (localSession) {
+            const problemIndex = localSession.problems.findIndex(
+              (p) => p.questionId === question_id
+            );
+            if (problemIndex !== -1) {
+              localSession.problems[problemIndex] = {
+                ...localSession.problems[problemIndex],
+                userAnswer: userAnswer,
+                isCorrect: data.is_correct,
+                feedback: data.feedbackText,
+                solution: data.solution,
+                createdAt: data.created_at,
+              };
+            }
+            localSession.score = localSession.problems.filter(
+              (p) => p.isCorrect
+            ).length;
+            localSession.status = localSession.problems.every(
+              (p) => p.userAnswer !== null
+            )
+              ? 'Completed'
+              : 'Incomplete';
+            await updateSession(localSession);
+          }
+        }
+      } catch (error) {
+        setError(
+          error instanceof Error ? error.message : 'Failed to submit answer'
+        );
+        console.error('Error submitting answer:', error);
+      } finally {
+        setIsLoading(initialLoading);
       }
-      setIsCorrect(data.is_correct);
-      setScore((prev) => (data.is_correct ? prev + 1 : prev));
-      setFeedback(data.feedback_text);
-      setProblemHistory((prev) => [
-        ...prev,
-        {
-          id: sessionId,
-          problem_text: problem?.problem_text || '',
-          user_answer: userAnswer,
-          is_correct: data.is_correct,
-          solution: data.solution,
-          created_at: data.created_at,
-        },
-      ]);
-    } catch (error) {
-      setError(
-        error instanceof Error ? error.message : 'Failed to submit answer'
-      );
-      console.error('Error submitting answer:', error);
-    } finally {
-      setIsLoading(initialLoading);
-    }
+    },
+    []
+  );
+
+  const resumeSavedSession = useCallback(async (session: LocalSession) => {
+    setProblem(
+      session.problems.map((p) => ({
+        question_id: p.questionId,
+        problemText: p.problemText,
+        problemType: p.problemType,
+        difficultyLevel: p.difficultyLevel,
+        hint: p.hint,
+        solution: p.solution,
+        isAnswered: p.userAnswer ? true : false,
+        userAnswer: p.userAnswer,
+        isCorrect: p.isCorrect,
+        feedback: p.feedback,
+        createdAt: p.createdAt,
+      }))
+    );
+    setCurrentProblemId(session.problems.find((p) => !p.userAnswer).questionId);
+    setCurrentProblemIndex(session.problems.findIndex((p) => !p.userAnswer));
+    setProblemSessionConfig({
+      count: session.count,
+      gradeLevel: session.gradeLevel,
+    });
+  }, []);
+
+  const isProblemsCompletelyAnswered = problem?.every((p) => p.isAnswered);
+
+  const invalidateCurrentSession = (): void => {
+    setProblem(null);
+    setCurrentProblemId('');
+    setIsLoading(initialLoading);
+    setScore(0);
+    setError(null);
   };
 
   return (
     <MathProblemContext.Provider
       value={{
-        userAnswer,
-        setUserAnswer,
+        generateProblemBatch,
+        setCurrentProblemId,
+        currentProblemId,
+        problemSessionConfig,
+        setProblemSessionConfig,
+        currentProblemIndex,
+        setCurrentProblemIndex,
         score,
-        problemHistory,
-        showHistory,
-        setShowHistory,
         problem,
-        feedback,
-        isCorrect,
+        setProblem,
         isLoading,
-        generateProblem,
         submitAnswer,
         error,
+        invalidateCurrentSession,
+        resumeSavedSession,
+        isProblemsCompletelyAnswered,
       }}
     >
       {children}
