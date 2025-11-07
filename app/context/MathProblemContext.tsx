@@ -13,10 +13,10 @@ import {
 } from '../../lib/@types/problemTypes';
 import { getSession, LocalSession, updateSession } from '@/lib/sessionStorage';
 interface AnswerResponse {
-  is_correct: boolean;
+  isCorrect: boolean;
   feedbackText: string;
   solution: string;
-  created_at: string;
+  answeredAt: string;
   error?: string;
 }
 
@@ -104,7 +104,7 @@ export const MathProblemProvider = ({ children }: { children: ReactNode }) => {
             isCorrect: null,
             feedback: null,
             solution: null,
-            createdAt: null,
+            answeredAt: null,
           }))
         );
         setCurrentProblemId(data.generatedProblems[0].question_id);
@@ -123,7 +123,7 @@ export const MathProblemProvider = ({ children }: { children: ReactNode }) => {
                 isCorrect: null,
                 feedback: null,
                 solution: null,
-                createdAt: null,
+                answeredAt: null,
               });
             }
             localSession.count = count;
@@ -171,10 +171,10 @@ export const MathProblemProvider = ({ children }: { children: ReactNode }) => {
                 ...p,
                 userAnswer: userAnswer,
                 isAnswered: true,
-                isCorrect: data.is_correct,
+                isCorrect: data.isCorrect,
                 feedback: data.feedbackText,
                 solution: data.solution,
-                createdAt: data.created_at,
+                answeredAt: data.answeredAt,
               };
             }
             return p;
@@ -191,10 +191,10 @@ export const MathProblemProvider = ({ children }: { children: ReactNode }) => {
               localSession.problems[problemIndex] = {
                 ...localSession.problems[problemIndex],
                 userAnswer: userAnswer,
-                isCorrect: data.is_correct,
+                isCorrect: data.isCorrect,
                 feedback: data.feedbackText,
                 solution: data.solution,
-                createdAt: data.created_at,
+                answeredAt: data.answeredAt,
               };
             }
             localSession.score = localSession.problems.filter(
@@ -233,7 +233,7 @@ export const MathProblemProvider = ({ children }: { children: ReactNode }) => {
         userAnswer: p.userAnswer,
         isCorrect: p.isCorrect,
         feedback: p.feedback,
-        createdAt: p.createdAt,
+        answeredAt: p.answeredAt,
       }))
     );
     setCurrentProblemId(session.problems.find((p) => !p.userAnswer).questionId);

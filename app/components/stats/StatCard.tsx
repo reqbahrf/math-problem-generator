@@ -23,7 +23,7 @@ const StatCard = () => {
         isCorrect={p.isCorrect}
         problemType={p.problemType}
         solution={p.solution}
-        createdAt={p.createdAt}
+        answeredAt={p.answeredAt}
       />
     ));
     openModal({
