@@ -21,7 +21,7 @@ const Modal = ({
       sizeClass = 'max-w-[70vw] max-h-[50vh]';
       break;
     case 'full':
-      sizeClass = 'max-w-full max-h-full';
+      sizeClass = 'min-w-full max-w-full min-h-full max-h-full';
       break;
     case 'responsive':
       sizeClass =
