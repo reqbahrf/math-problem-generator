@@ -1,46 +1,82 @@
-### Requirements Checklist
+# Math Problem Generator
 
-- [x] AI generates appropriate Primary 5 level math problems
-- [x] Problems and answers are saved to Supabase
-- [x] User submissions are saved with feedback
-- [x] AI generates helpful, personalized feedback
-- [x] UI is clean and mobile-responsive
-- [x] Error handling for API failures
-- [x] Loading states during API calls
+## 🎯 **Core Features**
 
-## Assessment Submission
+- **AI-Powered Math Problem Generation**
 
-When submitting your assessment, provide:
+  - Uses **Gemini AI** to generate math problems dynamically.
+  - Supports **Grade 1–12** with difficulty levels (_Easy, Medium, Hard_).
+  - Generates problems from various types: _Addition, Subtraction, Multiplication, Division, Geometry,_ etc.
 
-1. **GitHub Repository URL**: https://github.com/reqbahrf/math-problem-generator.git
-2. **Live Demo URL**: https://mathgenai.vercel.app
-3. **Supabase Credentials**: Add these to your README for testing:
-   ```
-   SUPABASE_URL: https://tpkrfcfsjjsjxwfvyngp.supabase.co
-   SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRwa3JmY2Zzampzanh3ZnZ5bmdwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMjgwNDYsImV4cCI6MjA3NTYwNDA0Nn0.TNqPvAmvJp3FPfviQNUacaUD9peAcr68ShSmZy4b844
-   ```
+- **Step-by-Step Learning Assistance**
 
-## Implementation Notes
+  - Provides **AI-generated hints** and **detailed step-by-step solutions**.
+  - Offers **feedback** after each answer submission to help students learn from mistakes.
 
-_Please fill in this section with any important notes about your implementation, design decisions, challenges faced, or features you're particularly proud of._
+- **Answer Evaluation & Feedback**
+  - Compares user answers with correct solutions.
+  - Gives **instant feedback** on correctness with AI-crafted explanations.
+  - Displays progress bars and visual indicators for completion.
 
-### My Implementation:
+## 💾 **Session Management**
 
-- In my implementation, I have included a dark mode and light mode toggle button. utilising the tailwindcss **dark** class to let the user choose their preferred mode. and to lessen the eye strain when using the web app at nighttime.
-- I have included a label in the problem card to let the user know the type of the problem and the difficulty level of the problem. as well as a hint toggle button to let the user get a hint for the problem.
-- I have also included a rate limit middleware on the **/api/** route to prevent the user from making too many requests to the API.
+- **Local Session Storage (IndexedDB)**
 
-## Additional Features (Optional)
+  - Automatically saves user sessions locally.
+  - Supports **resuming unfinished sessions**.
+  - Sessions store all problems, answers, scores, and timestamps.
 
-If you have time, consider adding:
+- **Session Expiration & Cleanup**
 
-- [x] Difficulty levels (Easy/Medium/Hard)
-- [x] Problem history view
-- [x] Score tracking
-- [x] Different problem types (addition, subtraction, multiplication, division)
-- [x] Hints system
-- [x] Step-by-step solution explanations
+  - Deletes **sessions older than one year**.
+  - Includes utilities to **delete individual or all sessions** manually.
 
----
+- **View Session History**
+  - Dedicated page showing all past sessions.
+  - Displays summary statistics for each session:
+    - Total problems answered
+    - Correct vs. incorrect answers
+    - Average performance
 
-Good luck with your assessment! 🎯
+## 📊 **Analytics & Visualization**
+
+- **Interactive Charts**
+
+  - **Pie chart** for problem type distribution.
+  - **Line chart** for difficulty level distribution.
+  - Helps visualize learning trends over time.
+
+- **Result Summary Modal**
+
+  - After completing a session, users can view a **comprehensive performance summary** in a modal.
+  - Shows each question, user’s answer, correctness, and feedback.
+
+## 🧭 **User Interface & Experience**
+
+- **Dark / Light Mode Support**
+
+  - Theme toggling with persistence across sessions.
+  - Smooth transitions and FOUC prevention via an initialization script.
+
+- **Responsive, Animated UI**
+
+  - Built with **Next.js 14 + React 18** using **Framer Motion** for smooth animations.
+  - Interactive buttons, modals, and transitions.
+
+- **Configurable Session Setup**
+
+  - Users can select:
+    - Number of problems per session
+    - Grade level difficulty
+  - Quick “Start Practicing” and “View Previous Sessions” actions.
+
+## 🌐 **Technical Integrations**
+
+- **Supabase Backend**
+
+  - Stores generated problems, submissions, and feedback logs.
+  - Cleans up outdated records automatically.
+
+- **Google Generative AI (Gemini)**
+
+  - Generates problems and personalized feedback using large language model prompts.

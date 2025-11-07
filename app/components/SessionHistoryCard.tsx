@@ -63,7 +63,7 @@ const SessionHistoryCard = ({
     if (!id) return;
     openModal({
       title: 'Confirm',
-      headerColor: 'bg-red-600 dark:bg-red-400',
+      headerColor: 'bg-blue-600 dark:bg-blue-400',
       children: (
         <SessionResumeNotice
           sessionId={id}

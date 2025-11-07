@@ -38,7 +38,7 @@ const SessionResumeNotice: React.FC<SessionResumeNoticeProps> = ({
           Cancel
         </button>
         <button
-          className='bg-red-600 dark:bg-red-400 px-4 py-2 rounded'
+          className='bg-blue-600 dark:bg-blue-400 px-4 py-2 rounded'
           onClick={handleConfirm}
         >
           Confirm

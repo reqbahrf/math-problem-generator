@@ -6,7 +6,8 @@ import { useModalContext } from '@/app/context/useModalContext';
 import ResultSummary from '../modalBody/ResultSummary';
 
 const StatCard = () => {
-  const { problem, isProblemsCompletelyAnswered } = useMathProblem();
+  const { problem, problemSessionConfig, isProblemsCompletelyAnswered } =
+    useMathProblem();
 
   const { openModal } = useModalContext();
 
@@ -23,7 +24,7 @@ const StatCard = () => {
         isCorrect={p.isCorrect}
         problemType={p.problemType}
         solution={p.solution}
-        createdAt={p.createdAt}
+        answeredAt={p.answeredAt}
       />
     ));
     openModal({
@@ -38,6 +39,9 @@ const StatCard = () => {
       <div className='text-md font-bold text-gray-800 dark:text-white text-center'>
         Correct Answers: {problem?.filter((p) => p.isCorrect).length} /{' '}
         {problem?.length}
+      </div>
+      <div className='text-md font-bold text-gray-800 dark:text-white text-center'>
+        Grade Level: {problemSessionConfig.gradeLevel}
       </div>
       {isProblemsCompletelyAnswered && (
         <div className='flex justify-center mt-4'>

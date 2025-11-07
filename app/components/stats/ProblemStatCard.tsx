@@ -9,7 +9,7 @@ const ProblemStatCard: React.FC<ProblemSession> = ({
   isCorrect,
   problemType,
   solution,
-  createdAt,
+  answeredAt,
 }) => {
   return (
     <div className='bg-white dark:bg-gray-900 rounded-lg shadow-md p-6 grid grid-cols-[2fr_2fr] gap-4'>
@@ -47,7 +47,7 @@ const ProblemStatCard: React.FC<ProblemSession> = ({
           Type: {problemType}
         </p>
         <p className='text-gray-700 dark:text-gray-300 mb-2'>
-          Created: {createdAt}
+          Answered At: {answeredAt}
         </p>
       </div>
       <hr className='col-span-2' />

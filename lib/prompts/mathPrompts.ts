@@ -9,8 +9,8 @@ The JSON output must follow this structure:
 [
   {
   "problemText": "A short, clear math question suitable for Primary 5.",
-  "problemType": "Addition | Subtraction | Multiplication | Division",
-  "difficultyLevel": "Easy | Medium | Hard",
+  "problemType": "(Addition | Subtraction | Multiplication | Division) strictly output one of the four options don't include any other text",
+  "difficultyLevel": "(Easy | Medium | Hard) strictly output one of the three options don't include any other text",
   "finalAnswer": "number (only the numeric result, no explanation, should always be a whole number do not include any decimal points or fractions)",
   "stepByStepSolution": "A concise step-by-step solution (2-3 sentences). Use <strong> tags to highlight key terms like total, share, divide, or the answer is.",
   "hint": "A hint to help the student solve the problem. (about 1 sentence and not to obvious)",

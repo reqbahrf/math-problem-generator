@@ -21,7 +21,7 @@ export interface MathProblemState extends MathProblem {
   isCorrect: boolean | null;
   feedback: string | null;
   solution: string | null;
-  createdAt: string | null;
+  answeredAt: string | null;
 }
 
 export interface ProblemSession {
@@ -34,7 +34,7 @@ export interface ProblemSession {
   isCorrect?: boolean | null;
   feedback?: string | null;
   solution?: string | null;
-  createdAt?: string | null;
+  answeredAt?: string | null;
 }
 
 export interface ProblemSessionConfigState {

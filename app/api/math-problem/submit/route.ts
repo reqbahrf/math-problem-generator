@@ -57,7 +57,7 @@ export async function POST(req: Request) {
       isCorrect: isCorrect,
       feedbackText: feedback.feedbackText,
       solution: session.step_by_step_solution,
-      createdAt: formatDate(session.created_at),
+      answeredAt: formatDate(session.created_at),
     });
   } catch (error) {
     console.log('Error on answer submission', error);
