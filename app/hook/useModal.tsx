@@ -1,7 +1,7 @@
 'use client';
 import { useState, useCallback, ReactElement } from 'react';
 import Modal from '../components/Modal';
-import type { OpenModalProps } from '../types/modal';
+import type { OpenModalProps, ModalSize } from '../types/modal';
 
 interface UseModalReturn {
   modal: ReactElement | null;
@@ -17,9 +17,7 @@ const useModal = (): UseModalReturn => {
     React.RefObject<HTMLButtonElement> | undefined
   >(undefined);
   const [modalHeaderColor, setModalHeaderColor] = useState('');
-  const [size, setSize] = useState<
-    'sm' | 'md' | 'md-f-h' | 'full' | 'responsive'
-  >('md');
+  const [size, setSize] = useState<ModalSize>('md');
   const [onCloseCallback, setOnCloseCallback] = useState<
     (() => void) | undefined
   >(undefined);

@@ -1,14 +1,6 @@
 'use client';
 import React, { useEffect, useRef, useState } from 'react';
-
-interface ModalProps {
-  title: string;
-  size: 'sm' | 'md' | 'md-f-h' | 'full' | 'responsive';
-  headerColor?: string;
-  triggerRef?: React.RefObject<HTMLButtonElement> | undefined;
-  onClose: () => void;
-  children: React.ReactNode;
-}
+import type { ModalProps } from '../types/modal';
 
 const Modal = ({
   title,
