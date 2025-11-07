@@ -1,14 +1,6 @@
 'use client';
 import React, { useEffect, useRef, useState } from 'react';
-
-interface ModalProps {
-  title: string;
-  size: 'sm' | 'md' | 'md-f-h' | 'full' | 'responsive';
-  headerColor?: string;
-  triggerRef?: React.RefObject<HTMLButtonElement> | undefined;
-  onClose: () => void;
-  children: React.ReactNode;
-}
+import type { ModalProps } from '../types/modal';
 
 const Modal = ({
   title,
@@ -29,7 +21,7 @@ const Modal = ({
       sizeClass = 'max-w-[70vw] max-h-[50vh]';
       break;
     case 'full':
-      sizeClass = 'max-w-full max-h-full';
+      sizeClass = 'min-w-full max-w-full min-h-full max-h-full';
       break;
     case 'responsive':
       sizeClass =
