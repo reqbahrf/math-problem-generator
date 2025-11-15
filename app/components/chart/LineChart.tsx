@@ -2,21 +2,16 @@
 
 import React, { Component } from 'react';
 import Chart from 'react-apexcharts';
-import { ChartThemeManager } from '@/lib/chartUtils';
 
 interface props {
   series: number[];
   categories: string[];
+  theme: 'light' | 'dark';
 }
 
 export default class LineChart extends Component<props, any> {
-  private themeManager: ChartThemeManager;
-
   constructor(props: props) {
     super(props);
-    this.themeManager = new ChartThemeManager(
-      this.handleThemeChange.bind(this)
-    );
     this.state = {
       series: [
         {
@@ -27,7 +22,7 @@ export default class LineChart extends Component<props, any> {
       options: {
         chart: {
           type: 'line',
-          height: 350,
+          background: 'transparent',
           zoom: {
             enabled: false,
           },
@@ -47,42 +42,36 @@ export default class LineChart extends Component<props, any> {
           size: 5,
         },
         theme: {
-          mode: this.themeManager.getTheme(),
+          mode: props.theme,
         },
       },
     };
   }
 
-  handleThemeChange(theme: 'light' | 'dark') {
-    this.setState({
-      options: {
-        ...this.state.options,
-        theme: {
-          mode: theme,
+  componentDidUpdate(prevProps: Readonly<props>): void {
+    if (prevProps.theme !== this.props.theme) {
+      this.setState({
+        options: {
+          ...this.state.options,
+          theme: {
+            mode: this.props.theme,
+          },
         },
-      },
-    });
-  }
-
-  componentDidMount() {
-    this.themeManager.setupThemeObserver();
-  }
-
-  componentWillUnmount() {
-    console.log('unmounting');
-    console.log('before cleanup', this.themeManager);
-    this.themeManager.cleanup();
-    console.log('after cleanup', this.themeManager);
+      });
+    }
   }
 
   render() {
     return (
-      <Chart
-        options={this.state.options}
-        series={this.state.series}
-        type='line'
-        height={350}
-      />
+      <div className='min-w-full'>
+        <Chart
+          options={this.state.options}
+          series={this.state.series}
+          type='line'
+          width='100%'
+          height='300px'
+        />
+      </div>
     );
   }
 }
