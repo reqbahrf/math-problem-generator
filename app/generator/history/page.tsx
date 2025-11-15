@@ -5,6 +5,7 @@ import useSessions from '@/app/hook/useSessions';
 import BackButton from '@/app/components/BackButton';
 import useDeleteSession from '@/app/hook/useDeleteSession';
 import dynamic from 'next/dynamic';
+import useSessionWorker from '@/app/hook/useSessionWorker';
 
 const SessionHistoryCard = dynamic(
   () => import('@/app/components/SessionHistoryCard'),
@@ -18,8 +19,9 @@ const SessionHistoryCard = dynamic(
 
 export default function HistoryPage() {
   const { sessions, isGetSessionLoading, setSessions } = useSessions();
+  const { processedSessions, isLoading } = useSessionWorker(sessions);
   const { dlSession, dlAllSessions } = useDeleteSession(setSessions);
-  if (isGetSessionLoading) {
+  if (isGetSessionLoading || isLoading) {
     return (
       <div className='min-h-screen flex items-center justify-center text-gray-600 dark:text-gray-300 p-6 md:p-8'>
         <ThemeToggle />
@@ -27,7 +29,7 @@ export default function HistoryPage() {
       </div>
     );
   }
-  if (!sessions.length)
+  if (!processedSessions.length)
     return (
       <div className='min-h-screen flex items-center justify-center text-gray-600 dark:text-gray-300 p-6 md:p-8'>
         <ThemeToggle />
@@ -53,10 +55,10 @@ export default function HistoryPage() {
         </button>
       </div>
       <div className='space-y-10'>
-        {sessions.map((session) => (
+        {processedSessions.map((session) => (
           <SessionHistoryCard
-            key={session.id}
-            session={session}
+            key={session.session.id}
+            processedSession={session}
             dlSession={dlSession}
           />
         ))}
