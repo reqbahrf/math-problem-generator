@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { motion } from 'motion/react';
-import DarkModeToggle from './components/DarkModeToggle';
+import ThemeToggle from './components/ThemeToggle';
 import useSessions from '@/app/hook/useSessions';
 import ConfigForm from './components/ConfigForm';
 import { useModalContext } from './context/useModalContext';
@@ -29,7 +29,7 @@ export default function IndexPage() {
   if (isGetSessionLoading) {
     return (
       <div className='min-h-screen flex items-center justify-center text-gray-600 dark:text-gray-300 p-6 md:p-8'>
-        <DarkModeToggle />
+        <ThemeToggle />
         <p>Checking your previous sessions...</p>
       </div>
     );
@@ -37,7 +37,7 @@ export default function IndexPage() {
 
   return (
     <div className='min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-blue-50 to-white dark:from-gray-900 dark:to-gray-800 text-gray-800 dark:text-white px-6 relative overflow-hidden'>
-      <DarkModeToggle />
+      <ThemeToggle />
 
       {/* Decorative blurred circles */}
       <div className='absolute top-0 left-0 w-72 h-72 bg-blue-400/30 dark:bg-blue-500/20 rounded-full blur-3xl -translate-x-20 -translate-y-20' />

@@ -3,7 +3,7 @@
 import { useMathProblem } from '../context/MathProblemContext';
 import FeedbackCard from '../components/FeedbackCard';
 import ProblemCard from '../components/problem/ProblemCard';
-import DarkModeToggle from '../components/DarkModeToggle';
+import ThemeToggle from '../components/ThemeToggle';
 import ErrorCard from '../components/ErrorCard';
 import StatCard from '../components/stats/StatCard';
 import { Suspense, useEffect, useRef, useState } from 'react';
@@ -111,7 +111,7 @@ function GeneratorInner() {
 
   return (
     <div className='relative min-h-screen bg-gradient-to-b from-blue-50 to-white dark:bg-gradient-to-b dark:from-gray-900 dark:to-gray-800'>
-      <DarkModeToggle />
+      <ThemeToggle />
       <main className='container mx-auto px-4 py-8 max-w-2xl'>
         <h1 className='text-4xl font-bold text-center mb-8 text-gray-800 dark:text-white'>
           Math Problem

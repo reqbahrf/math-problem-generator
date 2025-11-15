@@ -5,6 +5,7 @@ import './globals.css';
 import { themeInitScript } from '@/lib/initThemeScript';
 const inter = Inter({ subsets: ['latin'] });
 import { ModalProvider } from './context/useModalContext';
+import { ThemeProvider } from './context/ThemeContext';
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL),
@@ -38,9 +39,11 @@ export default function RootLayout({
       <body className={inter.className}>
         {/* Script to initialize theme and Prevent Flash of Unstyled Content (FOUC) */}
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
-        <MathProblemProvider>
-          <ModalProvider>{children}</ModalProvider>
-        </MathProblemProvider>
+        <ThemeProvider>
+          <MathProblemProvider>
+            <ModalProvider>{children}</ModalProvider>
+          </MathProblemProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
