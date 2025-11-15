@@ -9,6 +9,7 @@ import LineChart from '@/app/components/chart/LineChart';
 import { RiDeleteBin2Line, RiPlayCircleLine } from '@remixicon/react';
 import { useModalContext } from '@/app/context/useModalContext';
 import SessionResumeNotice from '@/app/components/modalBody/SessionResumeNotice';
+import { useThemeContext } from '../context/ThemeContext';
 
 interface SessionHistoryCardProps {
   session: LocalSession;
@@ -19,6 +20,7 @@ const SessionHistoryCard = ({
   session,
   dlSession,
 }: SessionHistoryCardProps) => {
+  const { isDarkTheme } = useThemeContext();
   const [isOpen, setIsOpen] = useState(false);
   const { openModal, closeModal } = useModalContext();
 
@@ -207,23 +209,25 @@ const SessionHistoryCard = ({
           >
             <div className='space-y-4 mt-6 border-t border-gray-200 dark:border-gray-600 pt-6'>
               {/* Charts Section */}
-              <div className='grid grid-cols-1 md:grid-cols-2 gap-6 mb-6'>
-                <div>
-                  <h3 className='text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4'>
+              <div className='grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6 mb-6'>
+                <div className='min-h-80 mb-8 md:mb-0'>
+                  <h3 className='md:text-lg text-sm text-center md:text-start font-semibold text-gray-800 dark:text-gray-100 mb-4'>
                     Problem Types Distribution
                   </h3>
                   <PieChart
                     series={problemTypeSeries}
                     labels={categories}
+                    theme={isDarkTheme ? 'dark' : 'light'}
                   />
                 </div>
-                <div>
-                  <h3 className='text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4'>
+                <div className='min-h-80 mb-8 md:mb-0'>
+                  <h3 className='md:text-lg text-sm text-center md:text-start font-semibold text-gray-800 dark:text-gray-100'>
                     Difficulty Level Distribution
                   </h3>
                   <LineChart
                     series={difficultySeries}
                     categories={difficultyCategories}
+                    theme={isDarkTheme ? 'dark' : 'light'}
                   />
                 </div>
               </div>
