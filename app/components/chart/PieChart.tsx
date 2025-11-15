@@ -2,23 +2,21 @@
 
 import React, { Component } from 'react';
 import Chart from 'react-apexcharts';
-import { ChartThemeManager } from '@/lib/chartUtils';
 
 interface props {
   series: number[];
   labels: string[];
+  theme: 'light' | 'dark';
 }
 
 export default class PieChart extends Component<props, any> {
-  private themeManager: ChartThemeManager;
-
   constructor(props: props) {
     super(props);
-    this.themeManager = new ChartThemeManager(this.handleThemeChange.bind(this));
     this.state = {
       series: props.series,
       options: {
         chart: {
+          background: 'transparent',
           type: 'pie',
           height: 350,
         },
@@ -27,7 +25,7 @@ export default class PieChart extends Component<props, any> {
           position: 'bottom',
         },
         theme: {
-          mode: this.themeManager.getTheme(),
+          mode: props.theme,
         },
         responsive: [
           {
@@ -46,33 +44,30 @@ export default class PieChart extends Component<props, any> {
     };
   }
 
-  handleThemeChange(theme: 'light' | 'dark') {
-    this.setState({
-      options: {
-        ...this.state.options,
-        theme: {
-          mode: theme,
+  componentDidUpdate(prevProps: Readonly<props>): void {
+    if (prevProps.theme !== this.props.theme) {
+      this.setState({
+        options: {
+          ...this.state.options,
+          theme: {
+            mode: this.props.theme,
+          },
         },
-      },
-    });
-  }
-
-  componentDidMount() {
-    this.themeManager.setupThemeObserver();
-  }
-
-  componentWillUnmount() {
-    this.themeManager.cleanup();
+      });
+    }
   }
 
   render() {
     return (
-      <Chart
-        options={this.state.options}
-        series={this.state.series}
-        type='pie'
-        height={350}
-      />
+      <div className='min-w-full flex items-center justify-center'>
+        <Chart
+          options={this.state.options}
+          series={this.state.series}
+          type='pie'
+          width='100%'
+          height='300px'
+        />
+      </div>
     );
   }
 }
