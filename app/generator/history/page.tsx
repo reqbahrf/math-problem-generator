@@ -1,6 +1,6 @@
 'use client';
 
-import DarkModeToggle from '@/app/components/DarkModeToggle';
+import ThemeToggle from '@/app/components/ThemeToggle';
 import useSessions from '@/app/hook/useSessions';
 import BackButton from '@/app/components/BackButton';
 import useDeleteSession from '@/app/hook/useDeleteSession';
@@ -22,7 +22,7 @@ export default function HistoryPage() {
   if (isGetSessionLoading) {
     return (
       <div className='min-h-screen flex items-center justify-center text-gray-600 dark:text-gray-300 p-6 md:p-8'>
-        <DarkModeToggle />
+        <ThemeToggle />
         <p>Checking your previous sessions...</p>
       </div>
     );
@@ -30,14 +30,14 @@ export default function HistoryPage() {
   if (!sessions.length)
     return (
       <div className='min-h-screen flex items-center justify-center text-gray-600 dark:text-gray-300 p-6 md:p-8'>
-        <DarkModeToggle />
+        <ThemeToggle />
         <p>No previous sessions found. Go back to generate a new problem.</p>
       </div>
     );
 
   return (
     <div className='min-h-screen bg-gradient-to-b from-blue-50 to-white dark:from-gray-900 dark:to-gray-800 p-6 md:p-8'>
-      <DarkModeToggle />
+      <ThemeToggle />
 
       <h1 className='text-4xl font-bold text-center mb-10 text-gray-800 dark:text-white'>
         Your Previous Sessions
