@@ -17,24 +17,25 @@ self.onmessage = (e: MessageEvent<LocalSession[]>) => {
   const categories = ['Addition', 'Subtraction', 'Multiplication', 'Division'];
   const difficultyCategories = ['Easy', 'Medium', 'Hard'];
   const result = sessions.map((session) => {
-    const numberOfAnsweredQuestions = session.problems.filter(
-      (p) => p.userAnswer !== null
-    ).length;
-    const problemTypeCounts = session.problems.reduce((counts, problem) => {
+    let numberOfAnsweredQuestions = 0;
+    const problemTypeCounts: Record<string, number> = {};
+    const difficultyCounts: Record<string, number> = {};
+
+    for (const problem of session.problems) {
+      if (problem.userAnswer !== null) {
+        numberOfAnsweredQuestions++;
+      }
+
       if (problem.problemType) {
-        counts[problem.problemType] = counts[problem.problemType] + 1 || 1;
+        problemTypeCounts[problem.problemType] =
+          (problemTypeCounts[problem.problemType] || 0) + 1;
       }
-      return counts;
-    }, {} as Record<string, number>);
 
-    const difficultyCounts = session.problems.reduce((counts, problem) => {
       if (problem.difficultyLevel) {
-        counts[problem.difficultyLevel] =
-          counts[problem.difficultyLevel] + 1 || 1;
+        difficultyCounts[problem.difficultyLevel] =
+          (difficultyCounts[problem.difficultyLevel] || 0) + 1;
       }
-      return counts;
-    }, {} as Record<string, number>);
-
+    }
     return {
       session: { ...session },
       numberOfAnsweredQuestions,
