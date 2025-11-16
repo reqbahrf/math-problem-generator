@@ -30,5 +30,12 @@ export default function useStateWorker<
     };
   }, [sessions]);
 
+  useEffect(() => {
+    if (workerRef.current) {
+      workerRef.current.terminate();
+      workerRef.current = undefined;
+    }
+  }, []);
+
   return { processedSessions, isLoading };
 }
