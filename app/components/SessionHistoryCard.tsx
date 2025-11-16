@@ -2,7 +2,6 @@
 
 import { memo, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { LocalSession } from '@/lib/sessionStorage';
 import ViewHistoryCard from '@/app/components/stats/ProblemStatCard';
 import PieChart from '@/app/components/chart/PieChart';
 import LineChart from '@/app/components/chart/LineChart';
@@ -10,16 +9,17 @@ import { RiDeleteBin2Line, RiPlayCircleLine } from '@remixicon/react';
 import { useModalContext } from '@/app/context/useModalContext';
 import SessionResumeNotice from '@/app/components/modalBody/SessionResumeNotice';
 import { useThemeContext } from '../context/ThemeContext';
+import { ProcessedSession } from '@/app/workers/session.worker';
 
 interface SessionHistoryCardProps {
-  session: LocalSession;
+  processedSession: ProcessedSession;
   dlSession: (e: React.MouseEvent<HTMLButtonElement>) => void;
 }
 
-const SessionHistoryCard = ({
-  session,
+const SessionHistoryCard: React.FC<SessionHistoryCardProps> = ({
+  processedSession,
   dlSession,
-}: SessionHistoryCardProps) => {
+}) => {
   const { isDarkTheme } = useThemeContext();
   const [isOpen, setIsOpen] = useState(false);
   const { openModal, closeModal } = useModalContext();
@@ -27,35 +27,6 @@ const SessionHistoryCard = ({
   const toggleDropdown = () => setIsOpen(!isOpen);
 
   const triggerRef = useRef<HTMLButtonElement>(null);
-  const numberOfAnsweredQuestions = session.problems.filter(
-    (p) => p.userAnswer !== null
-  ).length;
-  const problemCount = session.problems.length;
-
-  const problemTypeCounts = session.problems.reduce((counts, problem) => {
-    if (problem.problemType) {
-      counts[problem.problemType] = counts[problem.problemType] + 1 || 1;
-    }
-    return counts;
-  }, {} as Record<string, number>);
-
-  const categories = ['Addition', 'Subtraction', 'Multiplication', 'Division'];
-  const problemTypeSeries = categories.map(
-    (type) => problemTypeCounts[type] || 0
-  );
-
-  const difficultyCounts = session.problems.reduce((counts, problem) => {
-    if (problem.difficultyLevel) {
-      counts[problem.difficultyLevel] =
-        counts[problem.difficultyLevel] + 1 || 1;
-    }
-    return counts;
-  }, {} as Record<string, number>);
-
-  const difficultyCategories = ['Easy', 'Medium', 'Hard'];
-  const difficultySeries = difficultyCategories.map(
-    (type) => difficultyCounts[type] || 0
-  );
 
   const handleResumeSession = async (
     e: React.MouseEvent<HTMLButtonElement>
@@ -92,14 +63,14 @@ const SessionHistoryCard = ({
           <h1 className='text-2xl font-semibold text-gray-800 dark:text-gray-100 flex items-center gap-2'>
             🧮 Session{' '}
             <span className='text-blue-600 dark:text-blue-400 truncate max-w-[150px] sm:max-w-[250px]'>
-              {session.id}
+              {processedSession.session.id}
             </span>
           </h1>
 
           <h2 className='ps-4 text-lg font-medium text-gray-700 dark:text-gray-300 mt-1'>
             Started:{' '}
             <span className='text-blue-600 dark:text-blue-400 font-semibold'>
-              {new Date(session.createdAt).toLocaleString()}
+              {new Date(processedSession.session.createdAt).toLocaleString()}
             </span>
           </h2>
 
@@ -107,43 +78,53 @@ const SessionHistoryCard = ({
             Score:{' '}
             <span
               className={`font-semibold ${
-                session.score > 0
+                processedSession.session.score > 0
                   ? 'text-green-600 dark:text-green-400'
                   : 'text-gray-500 dark:text-gray-400'
               }`}
             >
-              {session.score} / {session.problems.length}
+              {processedSession.session.score} /{' '}
+              {processedSession.session.problems.length}
             </span>
           </h3>
           <div className='flex gap-4 ps-4 text-md font-medium text-gray-700 dark:text-gray-300'>
             <div>
               Problem Level:{' '}
               <span className='text-gray-500 dark:text-gray-400'>
-                Grade {session.gradeLevel}
+                Grade {processedSession.session.gradeLevel}
               </span>
             </div>
             <div>
               Status:{' '}
               <span
                 className={`text-blue-600 dark:text-blue-400 ${
-                  session.status === 'Completed'
+                  processedSession.session.status === 'Completed'
                     ? 'text-green-600 dark:text-green-400'
                     : 'text-red-600 dark:text-red-400'
                 }`}
               >
-                {session.status}
+                {processedSession.session.status}
               </span>
             </div>
           </div>
           <div className='mt-2 text-md font-medium text-gray-700 dark:text-gray-300'>
-            Progress: {numberOfAnsweredQuestions} / {problemCount} (
-            {((numberOfAnsweredQuestions / problemCount) * 100).toFixed(2)}
+            Progress: {processedSession.numberOfAnsweredQuestions} /{' '}
+            {processedSession.problemCount} (
+            {(
+              (processedSession.numberOfAnsweredQuestions /
+                processedSession.problemCount) *
+              100
+            ).toFixed(2)}
             %)
             <div className='w-full h-1 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden'>
               <div
                 className='h-full bg-blue-600 dark:bg-blue-400'
                 style={{
-                  width: `${(numberOfAnsweredQuestions / problemCount) * 100}%`,
+                  width: `${
+                    (processedSession.numberOfAnsweredQuestions /
+                      processedSession.problemCount) *
+                    100
+                  }%`,
                 }}
               />
             </div>
@@ -172,10 +153,10 @@ const SessionHistoryCard = ({
           </svg>
         </motion.button>
         <div className='absolute top-[-10px] right-[-10px]'>
-          {session.status === 'Incomplete' && (
+          {processedSession.session.status === 'Incomplete' && (
             <motion.button
               ref={triggerRef}
-              data-session-id={session.id}
+              data-session-id={processedSession.session.id}
               onClick={handleResumeSession}
               className='text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-600'
               whileHover={{ scale: 1.1 }}
@@ -185,7 +166,7 @@ const SessionHistoryCard = ({
             </motion.button>
           )}
           <motion.button
-            data-session-id={session.id}
+            data-session-id={processedSession.session.id}
             onClick={dlSession}
             className='text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-600'
             whileHover={{ scale: 1.1 }}
@@ -215,8 +196,8 @@ const SessionHistoryCard = ({
                     Problem Types Distribution
                   </h3>
                   <PieChart
-                    series={problemTypeSeries}
-                    labels={categories}
+                    series={processedSession.problemTypeSeries}
+                    labels={processedSession.categories}
                     theme={isDarkTheme ? 'dark' : 'light'}
                   />
                 </div>
@@ -225,19 +206,19 @@ const SessionHistoryCard = ({
                     Difficulty Level Distribution
                   </h3>
                   <LineChart
-                    series={difficultySeries}
-                    categories={difficultyCategories}
+                    series={processedSession.difficultySeries}
+                    categories={processedSession.difficultyCategories}
                     theme={isDarkTheme ? 'dark' : 'light'}
                   />
                 </div>
               </div>
 
-              {session.problems.length === 0 ? (
+              {processedSession.session.problems.length === 0 ? (
                 <p className='text-center text-gray-600 dark:text-gray-400 italic'>
                   No problems recorded for this session.
                 </p>
               ) : (
-                session.problems.map((p, i) => (
+                processedSession.session.problems.map((p, i) => (
                   <motion.div
                     key={i}
                     initial={{ opacity: 0, y: 10 }}
@@ -245,7 +226,7 @@ const SessionHistoryCard = ({
                     transition={{ delay: i * 0.05 }}
                   >
                     <ViewHistoryCard
-                      questionId={session.id}
+                      questionId={processedSession.session.id}
                       {...p}
                     />
                   </motion.div>

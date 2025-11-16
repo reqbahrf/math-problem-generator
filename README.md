@@ -80,3 +80,7 @@
 - **Google Generative AI (Gemini)**
 
   - Generates problems and personalized feedback using large language model prompts.
+
+- **Web Workers for Performance Optimization**
+
+  - Uses web workers to process session data asynchronously, improving UI responsiveness during analytics calculations and history loading.
