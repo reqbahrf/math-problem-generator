@@ -10,3 +10,11 @@ export interface ProcessedSession {
   categories: string[];
   difficultyCategories: string[];
 }
+
+export interface GeneratePdfProps {
+  session: LocalSession;
+  charts: {
+    pieChart: string;
+    lineChart: string;
+  };
+}
