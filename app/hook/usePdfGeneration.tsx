@@ -29,7 +29,7 @@ export default function usePdfGeneration() {
   };
 
   const parseBoldHtml = useCallback((htmlString: string) => {
-    const parts: any[] = [];
+    const parts: Array<{ text: string; bold?: boolean }> = [];
     const regex = /<strong>(.*?)<\/strong>/g;
     let lastIndex = 0;
     let match: RegExpExecArray | null;
@@ -71,10 +71,10 @@ export default function usePdfGeneration() {
           {
             ul: [
               `Session ID: ${raw.id}`,
-              `Created: ${raw.createdAt}`,
+              `Created: ${new Date(raw.createdAt).toLocaleString()}`,
               `Grade Level: ${raw.gradeLevel}`,
               `Status: ${raw.status}`,
-              `Score: ${raw.score}`,
+              `Score: ${raw.score} / ${raw.problems.length}`,
             ],
           },
 
@@ -124,8 +124,18 @@ export default function usePdfGeneration() {
           },
         ],
         styles: {
-          header: { fontSize: 22, bold: true, margin: [0, 0, 0, 15] },
-          subheader: { fontSize: 16, bold: true, margin: [0, 10, 0, 5] },
+          header: {
+            fontSize: 22,
+            bold: true,
+            margin: [0, 0, 0, 15],
+            alignment: 'center',
+          },
+          subheader: {
+            fontSize: 16,
+            bold: true,
+            margin: [0, 10, 0, 5],
+            alignment: 'left',
+          },
         },
       };
 
