@@ -6,6 +6,8 @@ import React, {
   forwardRef,
   useImperativeHandle,
   useEffect,
+  useMemo,
+  memo,
 } from 'react';
 import Chart from 'react-apexcharts';
 import type { ChartHandle, LineChartProps } from '@/lib/@types/chartTypes';
@@ -30,34 +32,37 @@ const LineChart = forwardRef<ChartHandle, LineChartProps>(
     useEffect(() => {
       setChartData({ series, categories, theme });
     }, [series, categories, theme]);
-    const options = {
-      chart: {
-        background: 'transparent',
-        zoom: {
-          enabled: false,
-        },
-        events: {
-          mounted: (chart) => {
-            chartRef.current = chart;
-            setIsReady(true);
+    const options = useMemo(
+      () => ({
+        chart: {
+          background: 'transparent',
+          zoom: {
+            enabled: false,
+          },
+          events: {
+            mounted: (chart) => {
+              chartRef.current = chart;
+              setIsReady(true);
+            },
           },
         },
-      },
-      xaxis: {
-        categories: chartData.categories,
-      },
-      yaxis: {
-        title: {
-          text: 'Number of Problems',
+        xaxis: {
+          categories: chartData.categories,
         },
-      },
-      markers: {
-        size: 5,
-      },
-      theme: {
-        mode: chartData.theme as 'light' | 'dark',
-      },
-    };
+        yaxis: {
+          title: {
+            text: 'Number of Problems',
+          },
+        },
+        markers: {
+          size: 5,
+        },
+        theme: {
+          mode: chartData.theme as 'light' | 'dark',
+        },
+      }),
+      [chartData]
+    );
 
     return (
       <div className='min-w-full'>
@@ -78,4 +83,4 @@ const LineChart = forwardRef<ChartHandle, LineChartProps>(
   }
 );
 LineChart.displayName = 'LineChart';
-export default LineChart;
+export default memo(LineChart);
