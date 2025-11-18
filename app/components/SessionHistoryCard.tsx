@@ -5,11 +5,16 @@ import { motion, AnimatePresence } from 'motion/react';
 import ViewHistoryCard from '@/app/components/stats/ProblemStatCard';
 import PieChart from '@/app/components/chart/PieChart';
 import LineChart from '@/app/components/chart/LineChart';
-import { RiDeleteBin2Line, RiPlayCircleLine } from '@remixicon/react';
+import {
+  RiDeleteBin2Line,
+  RiPlayCircleLine,
+  RiFileDownloadLine,
+} from '@remixicon/react';
 import { useModalContext } from '@/app/context/useModalContext';
 import SessionResumeNotice from '@/app/components/modalBody/SessionResumeNotice';
 import { useThemeContext } from '../context/ThemeContext';
-import { ProcessedSession } from '@/app/workers/session.worker';
+import type { ProcessedSession } from '@/app/types/processSession';
+import usePdfGeneration from '@/app/hook/usePdfGeneration';
 
 interface SessionHistoryCardProps {
   processedSession: ProcessedSession;
@@ -23,10 +28,18 @@ const SessionHistoryCard: React.FC<SessionHistoryCardProps> = ({
   const { isDarkTheme } = useThemeContext();
   const [isOpen, setIsOpen] = useState(false);
   const { openModal, closeModal } = useModalContext();
+  const { generatePdf } = usePdfGeneration();
 
   const toggleDropdown = () => setIsOpen(!isOpen);
 
   const triggerRef = useRef<HTMLButtonElement>(null);
+
+  const handlePDFGeneration = async (
+    e: React.MouseEvent<HTMLButtonElement>
+  ) => {
+    e.stopPropagation();
+    generatePdf(processedSession);
+  };
 
   const handleResumeSession = async (
     e: React.MouseEvent<HTMLButtonElement>
@@ -165,6 +178,16 @@ const SessionHistoryCard: React.FC<SessionHistoryCardProps> = ({
               <RiPlayCircleLine size={32} />
             </motion.button>
           )}
+          <motion.button
+            data-session-id={processedSession.session.id}
+            onClick={handlePDFGeneration}
+            className='text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-600'
+            whileHover={{ scale: 1.1 }}
+            transition={{ duration: 0.3 }}
+            aria-label='Download Session Report as PDF'
+          >
+            <RiFileDownloadLine size={32} />
+          </motion.button>
           <motion.button
             data-session-id={processedSession.session.id}
             onClick={dlSession}
