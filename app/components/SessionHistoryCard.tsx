@@ -16,6 +16,7 @@ import { useThemeContext } from '../context/ThemeContext';
 import type { ProcessedSession } from '@/app/types/processSession';
 import usePdfGeneration from '@/app/hook/usePdfGeneration';
 import type { ChartHandle } from '@/lib/@types/chartTypes';
+import { useLoading } from '../context/LoadingContext';
 
 interface SessionHistoryCardProps {
   processedSession: ProcessedSession;
@@ -26,6 +27,7 @@ const SessionHistoryCard: React.FC<SessionHistoryCardProps> = ({
   processedSession,
   dlSession,
 }) => {
+  const { localLoading, setLocalLoading } = useLoading();
   const { isDarkTheme } = useThemeContext();
   const [isOpen, setIsOpen] = useState(false);
   const { openModal, closeModal } = useModalContext();
@@ -44,16 +46,23 @@ const SessionHistoryCard: React.FC<SessionHistoryCardProps> = ({
     if (!pieChartRef.current?.isReady || !lineChartRef.current?.isReady) {
       return;
     }
-    const pieChart = await pieChartRef.current?.getImage();
-    const lineChart = await lineChartRef.current?.getImage();
-    const data = {
-      session: processedSession.session,
-      charts: {
-        pieChart,
-        lineChart,
-      },
-    };
-    await generatePdf(data);
+    setLocalLoading(processedSession.session.id, true);
+    try {
+      const pieChart = await pieChartRef.current?.getImage();
+      const lineChart = await lineChartRef.current?.getImage();
+      const data = {
+        session: processedSession.session,
+        charts: {
+          pieChart,
+          lineChart,
+        },
+      };
+      await generatePdf(data);
+    } catch (e) {
+      console.log(e);
+    } finally {
+      setLocalLoading(processedSession.session.id, false);
+    }
   };
 
   const handleResumeSession = async (
@@ -270,13 +279,23 @@ const SessionHistoryCard: React.FC<SessionHistoryCardProps> = ({
                       className='py-2 px-4 rounded-full bg-white dark:bg-gray-900 text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-600'
                       whileHover={{ scale: 1.1 }}
                       transition={{ duration: 0.3 }}
+                      disabled={localLoading[processedSession.session.id]}
                       aria-label='Download Session Report as PDF'
                     >
-                      <RiFileDownloadLine
-                        size={24}
-                        className='inline-block'
-                      />
-                      &nbsp;Export
+                      {localLoading[processedSession.session.id] ? (
+                        <>
+                          <span className='animate-spin'></span>
+                          &nbsp;Loading...
+                        </>
+                      ) : (
+                        <>
+                          <RiFileDownloadLine
+                            size={24}
+                            className='inline-block'
+                          />
+                          &nbsp;Export
+                        </>
+                      )}
                     </motion.button>
                   </div>
                 </>
