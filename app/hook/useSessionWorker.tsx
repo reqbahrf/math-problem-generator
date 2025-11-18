@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
 import { LocalSession } from '@/lib/sessionStorage';
-import { ProcessedSession } from '@/app/workers/session.worker';
+import type { ProcessedSession } from '@/app/types/processSession';
 
 export default function useStateWorker<
   T extends LocalSession[],
