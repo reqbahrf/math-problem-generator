@@ -5,6 +5,14 @@ import { useCallback } from 'react';
 
 pdfMake.addVirtualFileSystem(pdfFonts);
 
+interface GeneratePdfProps {
+  session: ProcessedSession;
+  charts: {
+    pieChart: string;
+    lineChart: string;
+  };
+}
+
 export default function usePdfGeneration() {
   const buildKeyValueTable = (data: Record<string, number>) => {
     return {
@@ -58,7 +66,8 @@ export default function usePdfGeneration() {
     return { text: parts };
   }, []);
   const generatePdf = useCallback(
-    (session: ProcessedSession) => {
+    ({ session, charts }: GeneratePdfProps) => {
+      console.log(charts);
       const { session: raw, ...rest } = session;
       const docDefinition = {
         content: [
@@ -82,14 +91,22 @@ export default function usePdfGeneration() {
             text: 'Problem Type Summary',
             style: 'subheader',
           },
-          buildKeyValueTable(rest.problemTypeCounts),
+          {
+            image: charts.pieChart,
+            width: 200,
+            alignment: 'center',
+          },
 
           {
             text: 'Difficulty Summary',
             style: 'subheader',
           },
-          buildKeyValueTable(rest.difficultyCounts),
-
+          {
+            image: charts.lineChart,
+            width: 500,
+            height: 200,
+            alignment: 'center',
+          },
           {
             text: 'Problem Details',
             style: 'subheader',
