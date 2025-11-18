@@ -25,7 +25,21 @@ const PieChart = forwardRef<ChartHandle, PieChartProps>(
       async getImage() {
         if (!isReady) return '';
         const chart = chartRef.current;
+
+        const originalOptions = chart.w.config;
+
+        await chart.updateOptions(
+          {
+            theme: { mode: 'light' },
+            chart: {
+              foreColor: '#222',
+            },
+          },
+          false,
+          true
+        );
         const { imgURI } = await chart.dataURI();
+        await chart.updateOptions(originalOptions, false, true);
         return imgURI;
       },
     }));
