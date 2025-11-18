@@ -15,6 +15,7 @@ import SessionResumeNotice from '@/app/components/modalBody/SessionResumeNotice'
 import { useThemeContext } from '../context/ThemeContext';
 import type { ProcessedSession } from '@/app/types/processSession';
 import usePdfGeneration from '@/app/hook/usePdfGeneration';
+import type { ChartHandle } from '@/lib/@types/chartTypes';
 
 interface SessionHistoryCardProps {
   processedSession: ProcessedSession;
@@ -33,12 +34,27 @@ const SessionHistoryCard: React.FC<SessionHistoryCardProps> = ({
   const toggleDropdown = () => setIsOpen(!isOpen);
 
   const triggerRef = useRef<HTMLButtonElement>(null);
+  const pieChartRef = useRef<ChartHandle>(null);
+  const lineChartRef = useRef<ChartHandle>(null);
 
   const handlePDFGeneration = async (
     e: React.MouseEvent<HTMLButtonElement>
   ) => {
     e.stopPropagation();
-    generatePdf(processedSession);
+    if (!pieChartRef.current?.isReady || !lineChartRef.current?.isReady) {
+      console.warn('Charts are not ready yet');
+      return;
+    }
+    const pieChart = await pieChartRef.current?.getImage();
+    const lineChart = await lineChartRef.current?.getImage();
+    const data = {
+      session: processedSession,
+      charts: {
+        pieChart,
+        lineChart,
+      },
+    };
+    generatePdf(data);
   };
 
   const handleResumeSession = async (
@@ -209,6 +225,7 @@ const SessionHistoryCard: React.FC<SessionHistoryCardProps> = ({
                       Problem Types Distribution
                     </h3>
                     <PieChart
+                      ref={pieChartRef}
                       series={processedSession.problemTypeSeries}
                       labels={processedSession.categories}
                       theme={isDarkTheme ? 'dark' : 'light'}
@@ -219,6 +236,7 @@ const SessionHistoryCard: React.FC<SessionHistoryCardProps> = ({
                       Difficulty Level Distribution
                     </h3>
                     <LineChart
+                      ref={lineChartRef}
                       series={processedSession.difficultySeries}
                       categories={processedSession.difficultyCategories}
                       theme={isDarkTheme ? 'dark' : 'light'}
