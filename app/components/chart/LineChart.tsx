@@ -9,6 +9,7 @@ import React, {
 } from 'react';
 import Chart from 'react-apexcharts';
 import type { ChartHandle, LineChartProps } from '@/lib/@types/chartTypes';
+import useChartImageGenerator from '@/app/hook/useChartImageGenerator';
 
 const LineChart = forwardRef<ChartHandle, LineChartProps>(
   ({ series, categories, theme }, ref) => {
@@ -20,26 +21,11 @@ const LineChart = forwardRef<ChartHandle, LineChartProps>(
     });
 
     const chartRef = useRef<any | null>(null);
+    const { getImage } = useChartImageGenerator(chartRef, isReady);
 
     useImperativeHandle(ref, () => ({
       isReady,
-      async getImage() {
-        if (!isReady) return '';
-        const chart = chartRef.current;
-        const originalOptions = chart.w.config;
-
-        await chart.updateOptions(
-          {
-            theme: { mode: 'light' },
-            chart: { foreColor: '#222' },
-          },
-          false,
-          true
-        );
-        const { imgURI } = await chart.dataURI();
-        await chart.updateOptions(originalOptions, false, true);
-        return imgURI;
-      },
+      getImage,
     }));
     useEffect(() => {
       setChartData({ series, categories, theme });
