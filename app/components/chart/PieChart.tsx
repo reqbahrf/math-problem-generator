@@ -6,6 +6,8 @@ import React, {
   forwardRef,
   useRef,
   useImperativeHandle,
+  useMemo,
+  memo,
 } from 'react';
 import Chart from 'react-apexcharts';
 import type { PieChartProps, ChartHandle } from '@/lib/@types/chartTypes';
@@ -28,38 +30,41 @@ const PieChart = forwardRef<ChartHandle, PieChartProps>(
     useEffect(() => {
       setChartData({ series, labels, theme });
     }, [series, labels, theme]);
-    const options = {
-      chart: {
-        background: 'transparent',
-        height: 350,
-        events: {
-          mounted: (chart) => {
-            chartRef.current = chart;
-            setIsReady(true);
-          },
-        },
-      },
-      labels: chartData.labels,
-      legend: {
-        position: 'bottom' as const,
-      },
-      theme: {
-        mode: chartData.theme as 'light' | 'dark',
-      },
-      responsive: [
-        {
-          breakpoint: 480,
-          options: {
-            chart: {
-              width: 200,
-            },
-            legend: {
-              position: 'bottom' as const,
+    const options = useMemo(
+      () => ({
+        chart: {
+          background: 'transparent',
+          height: 350,
+          events: {
+            mounted: (chart) => {
+              chartRef.current = chart;
+              setIsReady(true);
             },
           },
         },
-      ],
-    };
+        labels: chartData.labels,
+        legend: {
+          position: 'bottom' as const,
+        },
+        theme: {
+          mode: chartData.theme as 'light' | 'dark',
+        },
+        responsive: [
+          {
+            breakpoint: 480,
+            options: {
+              chart: {
+                width: 200,
+              },
+              legend: {
+                position: 'bottom' as const,
+              },
+            },
+          },
+        ],
+      }),
+      [chartData]
+    );
     return (
       <div className='min-w-full flex items-center justify-center'>
         <Chart
@@ -74,4 +79,4 @@ const PieChart = forwardRef<ChartHandle, PieChartProps>(
   }
 );
 PieChart.displayName = 'PieChart';
-export default PieChart;
+export default memo(PieChart);
