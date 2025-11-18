@@ -42,19 +42,18 @@ const SessionHistoryCard: React.FC<SessionHistoryCardProps> = ({
   ) => {
     e.stopPropagation();
     if (!pieChartRef.current?.isReady || !lineChartRef.current?.isReady) {
-      console.warn('Charts are not ready yet');
       return;
     }
     const pieChart = await pieChartRef.current?.getImage();
     const lineChart = await lineChartRef.current?.getImage();
     const data = {
-      session: processedSession,
+      session: processedSession.session,
       charts: {
         pieChart,
         lineChart,
       },
     };
-    generatePdf(data);
+    await generatePdf(data);
   };
 
   const handleResumeSession = async (
