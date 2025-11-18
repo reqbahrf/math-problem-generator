@@ -1,3 +1,4 @@
+import type { LocalSession } from '@/lib/sessionStorage';
 export interface ProcessedSession {
   session: LocalSession;
   numberOfAnsweredQuestions: number;
