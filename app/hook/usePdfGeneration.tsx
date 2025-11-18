@@ -1,29 +1,20 @@
 import * as pdfMake from 'pdfmake/build/pdfmake';
 import * as pdfFonts from 'pdfmake/build/vfs_fonts';
-import type { ProcessedSession } from '@/app/types/processSession';
+import type { GeneratePdfProps } from '@/app/types/processSession';
 import { useCallback } from 'react';
 
 pdfMake.addVirtualFileSystem(pdfFonts);
 
-interface GeneratePdfProps {
-  session: ProcessedSession;
-  charts: {
-    pieChart: string;
-    lineChart: string;
-  };
-}
-
 export default function usePdfGeneration() {
-  const buildKeyValueTable = (data: Record<string, number>) => {
-    return {
-      table: {
-        widths: ['*', 'auto'],
-        body: [
-          ['Type', 'Count'],
-          ...Object.entries(data).map(([key, value]) => [key, value]),
-        ],
-      },
-    };
+  const downloadBlob = (blob: Blob, filename: string) => {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   };
 
   const splitByNewLines = (text: string) => {
@@ -66,9 +57,7 @@ export default function usePdfGeneration() {
     return { text: parts };
   }, []);
   const generatePdf = useCallback(
-    ({ session, charts }: GeneratePdfProps) => {
-      console.log(charts);
-      const { session: raw, ...rest } = session;
+    async ({ session: raw, charts }: GeneratePdfProps) => {
       const docDefinition = {
         content: [
           { text: `Session Report`, style: 'header' },
@@ -156,7 +145,14 @@ export default function usePdfGeneration() {
         },
       };
 
-      pdfMake.createPdf(docDefinition).download(`session-${raw.id}.pdf`);
+      const pdfDoc = pdfMake.createPdf(docDefinition);
+
+      await new Promise<void>((resolve) => {
+        pdfDoc.getBlob((blob) => {
+          downloadBlob(blob, `session-${raw.id}.pdf`);
+          resolve();
+        });
+      });
     },
     [parseBoldHtml]
   );
