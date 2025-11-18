@@ -17,64 +17,121 @@ export default function usePdfGeneration() {
       },
     };
   };
-  const generatePdf = useCallback((session: ProcessedSession) => {
-    const { session: raw, ...rest } = session;
-    const docDefinition = {
-      content: [
-        { text: `Session Report`, style: 'header' },
 
-        {
-          text: `Session Info`,
-          style: 'subheader',
-        },
-        {
-          ul: [
-            `Session ID: ${raw.id}`,
-            `Created: ${raw.createdAt}`,
-            `Grade Level: ${raw.gradeLevel}`,
-            `Status: ${raw.status}`,
-            `Score: ${raw.score}`,
-          ],
-        },
+  const splitByNewLines = (text: string) => {
+    const out: { text: string }[] = [];
+    const lines = text.split('\n');
+    for (const [index, line] of lines.entries()) {
+      if (line) out.push({ text: line });
+      if (index < lines.length - 1) out.push({ text: '\n' });
+    }
+    return out;
+  };
 
-        {
-          text: 'Problem Type Summary',
-          style: 'subheader',
-        },
-        buildKeyValueTable(rest.problemTypeCounts),
+  const parseBoldHtml = useCallback((htmlString: string) => {
+    const parts: any[] = [];
+    const regex = /<strong>(.*?)<\/strong>/g;
+    let lastIndex = 0;
+    let match: RegExpExecArray | null;
 
-        {
-          text: 'Difficulty Summary',
-          style: 'subheader',
-        },
-        buildKeyValueTable(rest.difficultyCounts),
+    while ((match = regex.exec(htmlString)) !== null) {
+      const [fullMatch, boldContent] = match;
+      const matchIndex = match.index;
 
-        {
-          text: 'Problem Details',
-          style: 'subheader',
-        },
-        {
-          table: {
-            widths: ['auto', '*', 'auto', 'auto'],
-            body: [
-              ['#', 'Problem', 'Difficulty', 'Correct?'],
-              ...raw.problems.map((p, i) => [
-                i + 1,
-                p.problemText,
-                p.difficultyLevel,
-                p.isCorrect ? 'Yes' : 'No',
-              ]),
+      const plainText = htmlString.substring(lastIndex, matchIndex);
+      if (plainText) {
+        splitByNewLines(plainText).forEach((p) => parts.push(p));
+      }
+
+      splitByNewLines(boldContent).forEach((p) =>
+        parts.push({ text: p.text, bold: true })
+      );
+
+      lastIndex = matchIndex + fullMatch.length;
+    }
+
+    const remainingText = htmlString.substring(lastIndex);
+    if (remainingText) {
+      splitByNewLines(remainingText).forEach((p) => parts.push(p));
+    }
+
+    return { text: parts };
+  }, []);
+  const generatePdf = useCallback(
+    (session: ProcessedSession) => {
+      const { session: raw, ...rest } = session;
+      const docDefinition = {
+        content: [
+          { text: `Session Report`, style: 'header' },
+
+          {
+            text: `Session Info`,
+            style: 'subheader',
+          },
+          {
+            ul: [
+              `Session ID: ${raw.id}`,
+              `Created: ${raw.createdAt}`,
+              `Grade Level: ${raw.gradeLevel}`,
+              `Status: ${raw.status}`,
+              `Score: ${raw.score}`,
             ],
           },
-        },
-      ],
-      styles: {
-        header: { fontSize: 22, bold: true, margin: [0, 0, 0, 15] },
-        subheader: { fontSize: 16, bold: true, margin: [0, 10, 0, 5] },
-      },
-    };
 
-    pdfMake.createPdf(docDefinition).download(`session-${raw.id}.pdf`);
-  }, []);
+          {
+            text: 'Problem Type Summary',
+            style: 'subheader',
+          },
+          buildKeyValueTable(rest.problemTypeCounts),
+
+          {
+            text: 'Difficulty Summary',
+            style: 'subheader',
+          },
+          buildKeyValueTable(rest.difficultyCounts),
+
+          {
+            text: 'Problem Details',
+            style: 'subheader',
+          },
+          {
+            table: {
+              widths: ['auto', '*', 'auto', 'auto'],
+              body: [
+                ['#', 'Problem', 'Difficulty', 'Correct?'],
+                ...raw.problems.map((p, i) => {
+                  const cellContentString = `${p.problemText} ${
+                    p.userAnswer
+                      ? `\n\n<strong>Answer:</strong> ${p.userAnswer} \n\n<strong>Solution:</strong> ${p.solution}`
+                      : 'not answered'
+                  }`;
+                  const cellContent = parseBoldHtml(cellContentString);
+                  return [
+                    i + 1,
+                    cellContent,
+                    p.difficultyLevel,
+                    `${
+                      p.userAnswer !== null
+                        ? p.isCorrect
+                          ? 'Yes'
+                          : 'No'
+                        : 'Not Answered'
+                    }`,
+                  ];
+                }),
+              ],
+            },
+          },
+        ],
+        styles: {
+          header: { fontSize: 22, bold: true, margin: [0, 0, 0, 15] },
+          subheader: { fontSize: 16, bold: true, margin: [0, 10, 0, 5] },
+        },
+      };
+
+      pdfMake.createPdf(docDefinition).download(`session-${raw.id}.pdf`);
+    },
+    [parseBoldHtml]
+  );
   return { generatePdf };
 }
