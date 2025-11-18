@@ -60,7 +60,6 @@ const SessionHistoryCard: React.FC<SessionHistoryCardProps> = ({
       triggerRef,
     });
   };
-
   return (
     <motion.div
       layout
@@ -166,7 +165,7 @@ const SessionHistoryCard: React.FC<SessionHistoryCardProps> = ({
           </svg>
         </motion.button>
         <div className='absolute top-[-10px] right-[-10px]'>
-          {processedSession.session.status === 'Incomplete' && (
+          {processedSession.session.status !== 'Completed' && (
             <motion.button
               ref={triggerRef}
               data-session-id={processedSession.session.id}
