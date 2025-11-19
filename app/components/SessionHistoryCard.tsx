@@ -275,18 +275,19 @@ const SessionHistoryCard: React.FC<SessionHistoryCardProps> = ({
                   <div className='flex justify-end'>
                     <motion.button
                       data-session-id={processedSession.session.id}
+                      type='button'
                       onClick={handlePDFGeneration}
-                      className='py-2 px-4 rounded-full bg-white dark:bg-gray-900 text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-600'
+                      className='py-2 px-4 rounded-md bg-white dark:bg-gray-900 text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-600'
                       whileHover={{ scale: 1.1 }}
                       transition={{ duration: 0.3 }}
                       disabled={localLoading[processedSession.session.id]}
                       aria-label='Download Session Report as PDF'
                     >
                       {localLoading[processedSession.session.id] ? (
-                        <>
-                          <span className='animate-spin'></span>
-                          &nbsp;Loading...
-                        </>
+                        <div className='flex items-center'>
+                          <div className='mr-1 size-3 animate-spin rounded-full border-2 border-green-600 dark:border-green-400'></div>
+                          &nbsp;Exporting...
+                        </div>
                       ) : (
                         <>
                           <RiFileDownloadLine
