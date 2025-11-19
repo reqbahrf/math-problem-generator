@@ -53,6 +53,9 @@ const LineChart = forwardRef<ChartHandle, LineChartProps>(
           title: {
             text: 'Number of Problems',
           },
+          labels: {
+            formatter: (value) => value.toFixed(0),
+          },
         },
         markers: {
           size: 5,
