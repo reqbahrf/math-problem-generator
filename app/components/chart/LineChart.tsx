@@ -1,72 +1,82 @@
 'use client';
 
-import React, { Component } from 'react';
+import React, {
+  useRef,
+  useState,
+  forwardRef,
+  useImperativeHandle,
+  useEffect,
+  useMemo,
+  memo,
+} from 'react';
 import Chart from 'react-apexcharts';
+import type { ChartHandle, LineChartProps } from '@/lib/@types/chartTypes';
+import useChartImageGenerator from '@/app/hook/useChartImageGenerator';
 
-interface props {
-  series: number[];
-  categories: string[];
-  theme: 'light' | 'dark';
-}
+const LineChart = forwardRef<ChartHandle, LineChartProps>(
+  ({ series, categories, theme }, ref) => {
+    const [isReady, setIsReady] = useState(false);
+    const [chartData, setChartData] = useState({
+      series: [],
+      categories: [],
+      theme: '',
+    });
 
-export default class LineChart extends Component<props, any> {
-  constructor(props: props) {
-    super(props);
-    this.state = {
-      series: [
-        {
-          name: 'Problem Count',
-          data: props.series,
-        },
-      ],
-      options: {
+    const chartRef = useRef<any | null>(null);
+    const { getImage } = useChartImageGenerator(chartRef, isReady);
+
+    useImperativeHandle(ref, () => ({
+      isReady,
+      getImage,
+    }));
+    useEffect(() => {
+      setChartData({ series, categories, theme });
+    }, [series, categories, theme]);
+    const options = useMemo(
+      () => ({
         chart: {
-          type: 'line',
           background: 'transparent',
           zoom: {
             enabled: false,
           },
-        },
-        stroke: {
-          curve: 'straight',
+          events: {
+            mounted: (chart) => {
+              chartRef.current = chart;
+              setIsReady(true);
+            },
+          },
         },
         xaxis: {
-          categories: props.categories,
+          categories: chartData.categories,
         },
         yaxis: {
           title: {
             text: 'Number of Problems',
+          },
+          labels: {
+            formatter: (value) => value.toFixed(0),
           },
         },
         markers: {
           size: 5,
         },
         theme: {
-          mode: props.theme,
+          mode: chartData.theme as 'light' | 'dark',
         },
-      },
-    };
-  }
+      }),
+      [chartData]
+    );
 
-  componentDidUpdate(prevProps: Readonly<props>): void {
-    if (prevProps.theme !== this.props.theme) {
-      this.setState({
-        options: {
-          ...this.state.options,
-          theme: {
-            mode: this.props.theme,
-          },
-        },
-      });
-    }
-  }
-
-  render() {
     return (
       <div className='min-w-full'>
         <Chart
-          options={this.state.options}
-          series={this.state.series}
+          options={options}
+          series={[
+            {
+              name: 'Problem Count',
+              data: chartData.series,
+            },
+          ]}
           type='line'
           width='100%'
           height='300px'
@@ -74,4 +84,6 @@ export default class LineChart extends Component<props, any> {
       </div>
     );
   }
-}
+);
+LineChart.displayName = 'LineChart';
+export default memo(LineChart);

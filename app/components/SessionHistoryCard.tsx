@@ -5,11 +5,18 @@ import { motion, AnimatePresence } from 'motion/react';
 import ViewHistoryCard from '@/app/components/stats/ProblemStatCard';
 import PieChart from '@/app/components/chart/PieChart';
 import LineChart from '@/app/components/chart/LineChart';
-import { RiDeleteBin2Line, RiPlayCircleLine } from '@remixicon/react';
+import {
+  RiDeleteBin2Line,
+  RiPlayCircleLine,
+  RiFileDownloadLine,
+} from '@remixicon/react';
 import { useModalContext } from '@/app/context/useModalContext';
 import SessionResumeNotice from '@/app/components/modalBody/SessionResumeNotice';
 import { useThemeContext } from '../context/ThemeContext';
-import { ProcessedSession } from '@/app/workers/session.worker';
+import type { ProcessedSession } from '@/app/types/processSession';
+import usePdfGeneration from '@/app/hook/usePdfGeneration';
+import type { ChartHandle } from '@/lib/@types/chartTypes';
+import { useLoading } from '../context/LoadingContext';
 
 interface SessionHistoryCardProps {
   processedSession: ProcessedSession;
@@ -20,13 +27,43 @@ const SessionHistoryCard: React.FC<SessionHistoryCardProps> = ({
   processedSession,
   dlSession,
 }) => {
+  const { localLoading, setLocalLoading } = useLoading();
   const { isDarkTheme } = useThemeContext();
   const [isOpen, setIsOpen] = useState(false);
   const { openModal, closeModal } = useModalContext();
+  const { generatePdf } = usePdfGeneration();
 
   const toggleDropdown = () => setIsOpen(!isOpen);
 
   const triggerRef = useRef<HTMLButtonElement>(null);
+  const pieChartRef = useRef<ChartHandle>(null);
+  const lineChartRef = useRef<ChartHandle>(null);
+
+  const handlePDFGeneration = async (
+    e: React.MouseEvent<HTMLButtonElement>
+  ) => {
+    e.stopPropagation();
+    if (!pieChartRef.current?.isReady || !lineChartRef.current?.isReady) {
+      return;
+    }
+    setLocalLoading(processedSession.session.id, true);
+    try {
+      const pieChart = await pieChartRef.current?.getImage();
+      const lineChart = await lineChartRef.current?.getImage();
+      const data = {
+        session: processedSession.session,
+        charts: {
+          pieChart,
+          lineChart,
+        },
+      };
+      await generatePdf(data);
+    } catch (e) {
+      console.log(e);
+    } finally {
+      setLocalLoading(processedSession.session.id, false);
+    }
+  };
 
   const handleResumeSession = async (
     e: React.MouseEvent<HTMLButtonElement>
@@ -47,7 +84,6 @@ const SessionHistoryCard: React.FC<SessionHistoryCardProps> = ({
       triggerRef,
     });
   };
-
   return (
     <motion.div
       layout
@@ -153,7 +189,7 @@ const SessionHistoryCard: React.FC<SessionHistoryCardProps> = ({
           </svg>
         </motion.button>
         <div className='absolute top-[-10px] right-[-10px]'>
-          {processedSession.session.status === 'Incomplete' && (
+          {processedSession.session.status !== 'Completed' && (
             <motion.button
               ref={triggerRef}
               data-session-id={processedSession.session.id}
@@ -190,47 +226,80 @@ const SessionHistoryCard: React.FC<SessionHistoryCardProps> = ({
           >
             <div className='space-y-4 mt-6 border-t border-gray-200 dark:border-gray-600 pt-6'>
               {/* Charts Section */}
-              <div className='grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6 mb-6'>
-                <div className='min-h-80 mb-8 md:mb-0'>
-                  <h3 className='md:text-lg text-sm text-center md:text-start font-semibold text-gray-800 dark:text-gray-100 mb-4'>
-                    Problem Types Distribution
-                  </h3>
-                  <PieChart
-                    series={processedSession.problemTypeSeries}
-                    labels={processedSession.categories}
-                    theme={isDarkTheme ? 'dark' : 'light'}
-                  />
+              {processedSession.session.problems.length !== 0 && (
+                <div className='grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6 mb-6'>
+                  <div className='min-h-80 mb-8 md:mb-0'>
+                    <h3 className='md:text-lg text-sm text-center md:text-start font-semibold text-gray-800 dark:text-gray-100 mb-4'>
+                      Problem Types Distribution
+                    </h3>
+                    <PieChart
+                      ref={pieChartRef}
+                      series={processedSession.problemTypeSeries}
+                      labels={processedSession.categories}
+                      theme={isDarkTheme ? 'dark' : 'light'}
+                    />
+                  </div>
+                  <div className='min-h-80 mb-8 md:mb-0'>
+                    <h3 className='md:text-lg text-sm text-center md:text-start font-semibold text-gray-800 dark:text-gray-100'>
+                      Difficulty Level Distribution
+                    </h3>
+                    <LineChart
+                      ref={lineChartRef}
+                      series={processedSession.difficultySeries}
+                      categories={processedSession.difficultyCategories}
+                      theme={isDarkTheme ? 'dark' : 'light'}
+                    />
+                  </div>
                 </div>
-                <div className='min-h-80 mb-8 md:mb-0'>
-                  <h3 className='md:text-lg text-sm text-center md:text-start font-semibold text-gray-800 dark:text-gray-100'>
-                    Difficulty Level Distribution
-                  </h3>
-                  <LineChart
-                    series={processedSession.difficultySeries}
-                    categories={processedSession.difficultyCategories}
-                    theme={isDarkTheme ? 'dark' : 'light'}
-                  />
-                </div>
-              </div>
+              )}
 
               {processedSession.session.problems.length === 0 ? (
                 <p className='text-center text-gray-600 dark:text-gray-400 italic'>
                   No problems recorded for this session.
                 </p>
               ) : (
-                processedSession.session.problems.map((p, i) => (
-                  <motion.div
-                    key={i}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: i * 0.05 }}
-                  >
-                    <ViewHistoryCard
-                      questionId={processedSession.session.id}
-                      {...p}
-                    />
-                  </motion.div>
-                ))
+                <>
+                  {processedSession.session.problems.map((p, i) => (
+                    <motion.div
+                      key={i}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: i * 0.05 }}
+                    >
+                      <ViewHistoryCard
+                        questionId={processedSession.session.id}
+                        {...p}
+                      />
+                    </motion.div>
+                  ))}
+                  <div className='flex justify-end'>
+                    <motion.button
+                      data-session-id={processedSession.session.id}
+                      type='button'
+                      onClick={handlePDFGeneration}
+                      className='py-2 px-4 rounded-md bg-white dark:bg-gray-900 text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-600'
+                      whileHover={{ scale: 1.1 }}
+                      transition={{ duration: 0.3 }}
+                      disabled={localLoading[processedSession.session.id]}
+                      aria-label='Download Session Report as PDF'
+                    >
+                      {localLoading[processedSession.session.id] ? (
+                        <div className='flex items-center'>
+                          <div className='mr-1 size-3 animate-spin rounded-full border-2 border-green-600 dark:border-green-400'></div>
+                          &nbsp;Exporting...
+                        </div>
+                      ) : (
+                        <>
+                          <RiFileDownloadLine
+                            size={24}
+                            className='inline-block'
+                          />
+                          &nbsp;Export
+                        </>
+                      )}
+                    </motion.button>
+                  </div>
+                </>
               )}
             </div>
           </motion.div>
