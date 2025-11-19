@@ -49,6 +49,12 @@ const Features = () => {
       image: '/assets/math-ai-project/ai-session-management.webp',
     },
     {
+      title: 'Export Session as PDF',
+      description:
+        'Export your session as a PDF file for easy sharing and reference. ',
+      image: '/assets/math-ai-project/ai-export-session-as-pdf.webp',
+    },
+    {
       title: 'Dark / Light Mode',
       description:
         'Switch seamlessly between light and dark modes with preferences saved automatically.',
