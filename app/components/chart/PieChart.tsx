@@ -1,31 +1,53 @@
 'use client';
 
-import React, { Component } from 'react';
+import React, {
+  useEffect,
+  useState,
+  forwardRef,
+  useRef,
+  useImperativeHandle,
+  useMemo,
+  memo,
+} from 'react';
 import Chart from 'react-apexcharts';
+import type { PieChartProps, ChartHandle } from '@/lib/@types/chartTypes';
+import useChartImageGenerator from '@/app/hook/useChartImageGenerator';
+const PieChart = forwardRef<ChartHandle, PieChartProps>(
+  ({ series, labels, theme }, ref) => {
+    const chartRef = useRef<any | null>(null);
+    const [isReady, setIsReady] = useState(false);
+    const [chartData, setChartData] = useState({
+      series: [],
+      labels: [],
+      theme: '',
+    });
+    const { getImage } = useChartImageGenerator(chartRef, isReady);
+    useImperativeHandle(ref, () => ({
+      isReady,
+      getImage,
+    }));
 
-interface props {
-  series: number[];
-  labels: string[];
-  theme: 'light' | 'dark';
-}
-
-export default class PieChart extends Component<props, any> {
-  constructor(props: props) {
-    super(props);
-    this.state = {
-      series: props.series,
-      options: {
+    useEffect(() => {
+      setChartData({ series, labels, theme });
+    }, [series, labels, theme]);
+    const options = useMemo(
+      () => ({
         chart: {
           background: 'transparent',
-          type: 'pie',
           height: 350,
+          events: {
+            mounted: (chart) => {
+              chartRef.current = chart;
+              setIsReady(true);
+            },
+          },
         },
-        labels: props.labels,
+        labels: chartData.labels,
         legend: {
-          position: 'bottom',
+          position: 'bottom' as const,
         },
         theme: {
-          mode: props.theme,
+          mode: chartData.theme as 'light' | 'dark',
         },
         responsive: [
           {
@@ -35,34 +57,19 @@ export default class PieChart extends Component<props, any> {
                 width: 200,
               },
               legend: {
-                position: 'bottom',
+                position: 'bottom' as const,
               },
             },
           },
         ],
-      },
-    };
-  }
-
-  componentDidUpdate(prevProps: Readonly<props>): void {
-    if (prevProps.theme !== this.props.theme) {
-      this.setState({
-        options: {
-          ...this.state.options,
-          theme: {
-            mode: this.props.theme,
-          },
-        },
-      });
-    }
-  }
-
-  render() {
+      }),
+      [chartData]
+    );
     return (
       <div className='min-w-full flex items-center justify-center'>
         <Chart
-          options={this.state.options}
-          series={this.state.series}
+          options={options}
+          series={chartData.series}
           type='pie'
           width='100%'
           height='300px'
@@ -70,4 +77,6 @@ export default class PieChart extends Component<props, any> {
       </div>
     );
   }
-}
+);
+PieChart.displayName = 'PieChart';
+export default memo(PieChart);
