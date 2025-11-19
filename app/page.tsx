@@ -1,11 +1,18 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import dynamic from 'next/dynamic';
 import { motion } from 'motion/react';
 import ThemeToggle from './components/ThemeToggle';
 import useSessions from '@/app/hook/useSessions';
 import ConfigForm from './components/ConfigForm';
+import Loading from './components/Loading';
 import { useModalContext } from './context/useModalContext';
+
+const Features = dynamic(() => import('@/app/components/Features'), {
+  ssr: false,
+  loading: () => <Loading message='Loading features...' />,
+});
 
 export default function IndexPage() {
   const router = useRouter();
