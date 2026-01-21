@@ -5,14 +5,12 @@ import DeleteSessionNotice from '../components/modalBody/DeleteSessionNotice';
 import DeleteAllSessionNotice from '../components/modalBody/DeleteAllSessionNotice';
 
 const useDeleteSession = (
-  setSessions: React.Dispatch<React.SetStateAction<any[]>>
+  setSessions: React.Dispatch<React.SetStateAction<any[]>>,
 ) => {
   const { openModal, closeModal } = useModalContext();
 
   const dlSession = useCallback(
-    async (e: React.MouseEvent<HTMLButtonElement>) => {
-      e.stopPropagation();
-      const id = e.currentTarget.dataset.sessionId;
+    async (id: string) => {
       if (!id) return;
 
       openModal({
@@ -29,7 +27,7 @@ const useDeleteSession = (
         size: 'md',
       });
     },
-    [openModal, closeModal, setSessions]
+    [openModal, closeModal, setSessions],
   );
 
   const dlAllSessions = useCallback(async () => {

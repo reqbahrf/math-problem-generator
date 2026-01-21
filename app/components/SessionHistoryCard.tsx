@@ -20,7 +20,7 @@ import { useLoading } from '../context/LoadingContext';
 
 interface SessionHistoryCardProps {
   processedSession: ProcessedSession;
-  dlSession: (e: React.MouseEvent<HTMLButtonElement>) => void;
+  dlSession: (id: string) => void;
 }
 
 const SessionHistoryCard: React.FC<SessionHistoryCardProps> = ({
@@ -32,6 +32,7 @@ const SessionHistoryCard: React.FC<SessionHistoryCardProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const { openModal, closeModal } = useModalContext();
   const { generatePdf } = usePdfGeneration();
+  const id = processedSession.session.id;
 
   const toggleDropdown = () => setIsOpen(!isOpen);
 
@@ -40,7 +41,7 @@ const SessionHistoryCard: React.FC<SessionHistoryCardProps> = ({
   const lineChartRef = useRef<ChartHandle>(null);
 
   const handlePDFGeneration = async (
-    e: React.MouseEvent<HTMLButtonElement>
+    e: React.MouseEvent<HTMLButtonElement>,
   ) => {
     e.stopPropagation();
     if (!pieChartRef.current?.isReady || !lineChartRef.current?.isReady) {
@@ -65,11 +66,7 @@ const SessionHistoryCard: React.FC<SessionHistoryCardProps> = ({
     }
   };
 
-  const handleResumeSession = async (
-    e: React.MouseEvent<HTMLButtonElement>
-  ) => {
-    e.stopPropagation();
-    const id = e.currentTarget.dataset.sessionId;
+  const handleResumeSession = async () => {
     if (!id) return;
     openModal({
       title: 'Confirm',
@@ -83,6 +80,11 @@ const SessionHistoryCard: React.FC<SessionHistoryCardProps> = ({
       size: 'md',
       triggerRef,
     });
+  };
+  const handleDeleteSession = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+    if (!id) return;
+    dlSession(id);
   };
   return (
     <motion.div
@@ -192,7 +194,6 @@ const SessionHistoryCard: React.FC<SessionHistoryCardProps> = ({
           {processedSession.session.status !== 'Completed' && (
             <motion.button
               ref={triggerRef}
-              data-session-id={processedSession.session.id}
               onClick={handleResumeSession}
               className='text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-600'
               whileHover={{ scale: 1.1 }}
@@ -202,8 +203,7 @@ const SessionHistoryCard: React.FC<SessionHistoryCardProps> = ({
             </motion.button>
           )}
           <motion.button
-            data-session-id={processedSession.session.id}
-            onClick={dlSession}
+            onClick={handleDeleteSession}
             className='text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-600'
             whileHover={{ scale: 1.1 }}
             transition={{ duration: 0.3 }}
