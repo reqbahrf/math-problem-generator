@@ -48,7 +48,7 @@ interface MathProblemContextType {
   submitAnswer: (
     answer: string,
     question_id: string,
-    gradeLevel: number
+    gradeLevel: number,
   ) => Promise<void>;
   error: string | null;
   invalidateCurrentSession: () => void;
@@ -56,7 +56,7 @@ interface MathProblemContextType {
 }
 
 const MathProblemContext = createContext<MathProblemContextType | undefined>(
-  undefined
+  undefined,
 );
 
 const initialLoading: LoadingState = {
@@ -105,7 +105,7 @@ export const MathProblemProvider = ({ children }: { children: ReactNode }) => {
             feedback: null,
             solution: null,
             answeredAt: null,
-          }))
+          })),
         );
         setCurrentProblemId(data.generatedProblems[0].question_id);
         const currentSessionId = sessionStorage.getItem('activeSession');
@@ -135,14 +135,14 @@ export const MathProblemProvider = ({ children }: { children: ReactNode }) => {
         setError(
           error instanceof Error
             ? error.message
-            : 'Failed to generate problem batch'
+            : 'Failed to generate problem batch',
         );
         console.error('Error generating math problem batch:', error);
       } finally {
         setIsLoading(initialLoading);
       }
     },
-    []
+    [],
   );
 
   const submitAnswer = useCallback(
@@ -178,14 +178,14 @@ export const MathProblemProvider = ({ children }: { children: ReactNode }) => {
               };
             }
             return p;
-          })
+          }),
         );
         const currentSessionId = sessionStorage.getItem('activeSession');
         if (currentSessionId) {
           const localSession = await getSession(currentSessionId);
           if (localSession) {
             const problemIndex = localSession.problems.findIndex(
-              (p) => p.questionId === question_id
+              (p) => p.questionId === question_id,
             );
             if (problemIndex !== -1) {
               localSession.problems[problemIndex] = {
@@ -198,10 +198,10 @@ export const MathProblemProvider = ({ children }: { children: ReactNode }) => {
               };
             }
             localSession.score = localSession.problems.filter(
-              (p) => p.isCorrect
+              (p) => p.isCorrect,
             ).length;
             localSession.status = localSession.problems.every(
-              (p) => p.userAnswer !== null
+              (p) => p.userAnswer !== null,
             )
               ? 'Completed'
               : 'Incomplete';
@@ -210,14 +210,14 @@ export const MathProblemProvider = ({ children }: { children: ReactNode }) => {
         }
       } catch (error) {
         setError(
-          error instanceof Error ? error.message : 'Failed to submit answer'
+          error instanceof Error ? error.message : 'Failed to submit answer',
         );
         console.error('Error submitting answer:', error);
       } finally {
         setIsLoading(initialLoading);
       }
     },
-    []
+    [],
   );
 
   const resumeSavedSession = useCallback(async (session: LocalSession) => {
@@ -234,7 +234,7 @@ export const MathProblemProvider = ({ children }: { children: ReactNode }) => {
         isCorrect: p.isCorrect,
         feedback: p.feedback,
         answeredAt: p.answeredAt,
-      }))
+      })),
     );
     setCurrentProblemId(session.problems.find((p) => !p.userAnswer).questionId);
     setCurrentProblemIndex(session.problems.findIndex((p) => !p.userAnswer));
@@ -284,7 +284,7 @@ export const useMathProblem = () => {
   const context = useContext(MathProblemContext);
   if (!context) {
     throw new Error(
-      'useMathProblemContext must be used within a MathProblemProvider'
+      'useMathProblemContext must be used within a MathProblemProvider',
     );
   }
   return context;

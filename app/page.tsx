@@ -8,6 +8,7 @@ import useSessions from '@/app/hook/useSessions';
 import ConfigForm from './components/ConfigForm';
 import Loading from './components/Loading';
 import { useModalContext } from './context/useModalContext';
+import useQuotes from '@/app/hook/useQuotes';
 
 const Features = dynamic(() => import('@/app/components/Features'), {
   ssr: false,
@@ -16,6 +17,7 @@ const Features = dynamic(() => import('@/app/components/Features'), {
 
 export default function IndexPage() {
   const router = useRouter();
+  const { fetchQuote } = useQuotes();
   const { sessions, isGetSessionLoading } = useSessions();
   const { openModal, closeModal } = useModalContext();
 
@@ -31,6 +33,10 @@ export default function IndexPage() {
         />
       ),
     });
+  };
+
+  const onHoverQuote = async () => {
+    await fetchQuote();
   };
 
   if (isGetSessionLoading) {
@@ -115,6 +121,7 @@ export default function IndexPage() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.98 }}
               onClick={handleStart}
+              onMouseEnter={onHoverQuote}
               className='px-8 py-4 text-lg font-semibold rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg hover:shadow-xl transition-all'
             >
               Start Practicing →

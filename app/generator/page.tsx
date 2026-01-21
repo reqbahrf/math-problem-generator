@@ -13,8 +13,11 @@ import { useSearchParams } from 'next/navigation';
 import Loading from '../components/Loading';
 import { getSession } from '@/lib/sessionStorage';
 import EndCurrentSessionNotice from '../components/modalBody/EndCurrentSessionNotice';
+import QuoteCard from '../components/QuoteCard';
+import useQuotes from '@/app/hook/useQuotes';
 
 function GeneratorInner() {
+  const { getRandomQuote } = useQuotes();
   const searchParams = useSearchParams();
   const count = searchParams.get('count');
   const isResume = searchParams.get('resume') === 'true' || false;
@@ -124,9 +127,7 @@ function GeneratorInner() {
           {problem?.length > 0 && <StatCard />}
         </div>
         {loading ? (
-          <div className='text-center py-10 text-gray-600 dark:text-gray-300'>
-            Generating problems...
-          </div>
+          <QuoteCard {...getRandomQuote()} />
         ) : currentProblem ? (
           <>
             <ProblemCard {...currentProblem} />
